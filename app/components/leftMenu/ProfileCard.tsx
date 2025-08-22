@@ -2,17 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 
 const ProfileCard = () => {
-  // Mock user data (replace with props or context later)
   const user = {
     username: "john_doe",
     name: "John",
     surname: "Doe",
-    avatar: "/noAvatar.png",
-    cover: "/noCover.png",
+    avatar: "/icons/noAvatar.png",
+    cover: "/icons/noCover.png",
     followers: [
-      { username: "alice", avatar: "/noAvatar.png" },
-      { username: "bob", avatar: "/noAvatar.png" },
-      { username: "charlie", avatar: "/noAvatar.png" },
+      { username: "alice", avatar: "/icons/noAvatar.png" },
+      { username: "bob", avatar: "/icons/noAvatar.png" },
+      { username: "charlie", avatar: "/icons/noAvatar.png" },
     ],
     _count: { followers: 128 },
   };
@@ -22,14 +21,14 @@ const ProfileCard = () => {
       {/* Cover + Avatar */}
       <div className="h-20 relative">
         <Image
-          src={user.cover || "/noCover.png"}
-          alt={`${user.username}'s cover`}
+          src={user.cover}
+          alt={`${user.username} cover`}
           fill
           className="rounded-md object-cover"
         />
         <Image
-          src={user.avatar || "/noAvatar.png"}
-          alt={`${user.username}'s avatar`}
+          src={user.avatar}
+          alt={`${user.username} avatar`}
           width={48}
           height={48}
           className="rounded-full object-cover w-12 h-12 absolute left-0 right-0 m-auto -bottom-6 ring-2 ring-white z-10"
@@ -50,8 +49,8 @@ const ProfileCard = () => {
             {user.followers.map((follower, i) => (
               <Image
                 key={i}
-                src={follower.avatar || "/noAvatar.png"}
-                alt={`${follower.username}'s avatar`}
+                src={follower.avatar}
+                alt={`${follower.username} avatar`}
                 width={16}
                 height={16}
                 className="rounded-full object-cover w-4 h-4 border border-white"
