@@ -1,6 +1,13 @@
+import Post from "./post";
 
-import Post from "./post"
-export default function Feed() {
-  return <div className="p-4 bg-white shadow-md rounded-lg flex flex--col gap- "><Post/>
-  </div>;
-}
+const Feed = () => {
+  return (
+    <div className="flex justify-center w-full ">
+      <div className="w-full   bg-white shadow-md rounded-lg">
+        <Post />
+      </div>
+    </div>
+  );
+};
+
+export default Feed;
