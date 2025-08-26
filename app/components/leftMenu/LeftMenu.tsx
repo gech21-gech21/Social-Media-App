@@ -8,16 +8,16 @@ type LeftMenuProps = {
 };
 
 const menuItems = [
-  { href: "/", icon: "/posts.png", label: "My Posts" },
-  { href: "/", icon: "/activity.png", label: "Activity" },
-  { href: "/", icon: "/market.png", label: "Marketplace" },
-  { href: "/", icon: "/events.png", label: "Events" },
-  { href: "/", icon: "/albums.png", label: "Albums" },
-  { href: "/", icon: "/videos.png", label: "Videos" },
-  { href: "/", icon: "/news.png", label: "News" },
-  { href: "/", icon: "/courses.png", label: "Courses" },
-  { href: "/", icon: "/lists.png", label: "Lists" },
-  { href: "/", icon: "/settings.png", label: "Settings" },
+  { href: "/", icon: "/icons/posts.png", label: "My Posts" },
+  { href: "/", icon: "/icons/activity.png", label: "Activity" },
+  { href: "/", icon: "/icons/market.png", label: "Marketplace" },
+  { href: "/", icon: "/icons/events.png", label: "Events" },
+  { href: "/", icon: "/icons/albums.png", label: "Albums" },
+  { href: "/", icon: "/icons/videos.png", label: "Videos" },
+  { href: "/", icon: "/icons/news.png", label: "News" },
+  { href: "/", icon: "/icons/courses.png", label: "Courses" },
+  { href: "/", icon: "/icons/lists.png", label: "Lists" },
+  { href: "/", icon: "/icons/settings.png", label: "Settings" },
 ];
 
 const LeftMenu = ({ type }: LeftMenuProps) => {

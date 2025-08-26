@@ -1,6 +1,6 @@
-import React from "react";
-import Feed from "../../components/feed";
+import Feed from "@/app/components/feed";
 import LeftMenu from "@/app/components/leftMenu/LeftMenu";
+
 import Rightmenu from "../../components/Rightmenu";
 import Image from "next/image";
 const page = () => {
@@ -54,4 +54,5 @@ const page = () => {
     </div>
   );
 };
+
 export default page;
