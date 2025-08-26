@@ -10,61 +10,98 @@ datasource db {
 }
 
 // 3️⃣ Models
-
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  name      String?
-  password  String
-  bio       String?
-  image     String?
-  posts     Post[]
-  comments  Comment[]
-  likes     Like[]
-  followers Follow[] @relation("followers")
-  following Follow[] @relation("following")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String           @id @unique
+  avatar               String?
+  name                 String?
+  surname              String?
+  description          String?
+  city                 String?
+  country              String?
+  createdAt            DateTime         @default(now())
+  posts                Post[]
+  comments             Comment[]
+  likes                Like[]
+  stories              Story[]
+  work                 String?
+  followers            Follower[]       @relation("UserFollowers")
+  followings           Follower[]       @relation("UserFollowings")
+  followRequestsSent   FollowRequest[]  @relation("followRequestsSent")
+  followRequestsReceived FollowRequest[] @relation("followRequestsReceived")
+  blocksSent           Block[]          @relation("BlocksSent")
+  blocksReceived       Block[]          @relation("BlocksReceived")
 }
 
 model Post {
-  id        String    @id @default(cuid())
-  title     String
-  content   String?
-  author    User      @relation(fields: [authorId], references: [id])
-  authorId  String
-  comments  Comment[]
-  likes     Like[]
+  id        Int       @id @default(autoincrement())
+  desc      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     Like[]
+  userId    String // Changed from Int to String to match User.id
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  desc      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  likes     Like[]
+  userId    String    // Changed to String
+  postId    Int
 }
 
 model Like {
-  id       String @id @default(cuid())
-  user     User   @relation(fields: [userId], references: [id])
-  userId   String
-  post     Post   @relation(fields: [postId], references: [id])
-  postId   String
-  createdAt DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post?     @relation(fields: [postId], references: [id], onDelete: Cascade) // Made optional
+  comment   Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String    // Changed to String
+  postId    Int?      // This remains optional
+  commentId Int?
 }
 
-model Follow {
-  id         String @id @default(cuid())
-  follower   User   @relation("following", fields: [followerId], references: [id])
-  followerId String
-  following  User   @relation("followers", fields: [followingId], references: [id])
-  followingId String
+model FollowRequest {
+  id         Int      @id @default(autoincrement())
   createdAt  DateTime @default(now())
+  senderId   String
+  receiverId String 
+  
+  sender     User     @relation("followRequestsSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("followRequestsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@unique([senderId, receiverId])
+}
+
+model Block {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  blockedId  String
+  blockerId  String
+  
+  blocker    User     @relation("BlocksSent", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked    User     @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+}
+
+model Follower {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  followerId   String
+  followingId  String
+  
+  follower     User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following    User     @relation("UserFollowings", fields: [followingId], references: [id], onDelete: Cascade)
+}
+
+model Story {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
 }
