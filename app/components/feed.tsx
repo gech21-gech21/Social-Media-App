@@ -1,6 +1,20 @@
+import Post from "./post";
 
-import Post from "./post"
-export default function Feed() {
-  return <div className="p-4 bg-white shadow-md rounded-lg flex flex--col gap- "><Post/>
-  </div>;
-}
+type FeedProps = {
+  username?: string; // optional if you want Feed to work without a username
+};
+
+const Feed: React.FC<FeedProps> = ({ username }) => {
+  return (
+    <div className="flex justify-center w-full">
+      <div className="w-full bg-white shadow-md rounded-lg">
+        {username && (
+          <h2 className="text-xl font-bold mb-4">Posts from {username}</h2>
+        )}
+        <Post />
+      </div>
+    </div>
+  );
+};
+
+export default Feed;

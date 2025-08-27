@@ -1,98 +1,127 @@
+
 "use client";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import MobileMenu from "./MobileMenu";
 
+import {
+  ClerkLoading,
+  ClerkLoaded,
+  UserButton,
+  SignedIn,
+  SignedOut,
+} from "@clerk/nextjs";
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-  const navItems = [
-    { href: "/", icon: "/icons/home.png", label: "Home" },
-    { href: "/stories", icon: "/icons/story.png", label: "Stories" },
-    { href: "/friends", icon: "/icons/friends.png", label: "Friends" },
-    { href: "/search", icon: "/icons/searching.png", label: "Search" },
-    { href: "/profile", icon: "/icons/profile.png", label: "Profile" },
-  ];
-
   return (
-    <nav className="bg-white  sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex justify-between items-center py-3">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold text-indigo-600">S.media app</h1>
-          </div>
-          <div className="hidden md:flex items-center space-x-6">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
-                  pathname === item.href
-                    ? "bg-indigo-100 text-indigo-700"
-                    : "text-gray-600 hover:text-indigo-600 hover:bg-gray-100"
-                }`}
-              >
-                <Image
-                  width={24}
-                  height={20}
-                  alt={item.label}
-                  src={item.icon}
-                  className={
-                    pathname === item.href
-                      ? "filter brightness-0 saturate(100%) invert(36%) sepia(89%) saturate(1045%) hue-rotate(224deg) brightness(93%) contrast(93%)"
-                      : ""
-                  }
-                />
-                <span className="text-xs mt-1">{item.label}</span>
-              </Link>
-            ))}
-          </div>
+    <div className="flex  justify-between w-full">
+      {/* left */}
+      <div className="   w-[30%]  ">
+        <Link className="font-bold text-xl sm:text-3xl text-blue-600" href="/">
+          S.media app
+        </Link>
+      </div>
+      {/* center */}
+      <div className="hidden md:flex w-[70%] lg:gap-8 items-center  justify-between ">
+        <div className="flex gap-6 text-gray-600">
+          <Link className=" flex gap-2 items-center" href="/">
+            <Image
+              alt="home page image"
+              src="/icons/home.png"
+              width={30}
+              height={20}
+              className="h-4 w-4"
+            ></Image>
+            <span>Home</span>
+          </Link>
+          <Link className=" flex gap-2 items-center" href="/">
+            <Image
+              alt="home page image"
+              src="/icons/friends.png"
+              width={30}
+              height={20}
+              className="h-4 w-4"
+            ></Image>
+            <span>Friends</span>
+          </Link>
+          <Link className=" flex gap-2 items-center" href="/">
+            <Image
+              alt="home page image"
+              src="/icons/story.png"
+              width={30}
+              height={20}
+              className="h-4 w-4"
+            ></Image>
+            <span>stories</span>
+          </Link>
 
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={toggleMenu}
-              className="outline-none focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              <Image width={34} height={34} alt="Menu" src="/icons/bars.svg" />
-            </button>
-          </div>
-        </div>
-
-        <div className={`md:hidden ${isMenuOpen ? "block" : "hidden"}`}>
-          <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3 bg-gray-50 rounded-lg mt-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center px-3 py-3 rounded-md text-base font-medium transition-colors ${
-                  pathname === item.href
-                    ? "bg-indigo-100 text-indigo-700 border-l-4 border-indigo-600"
-                    : "text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-                }`}
-              >
-                <Image
-                  width={20}
-                  height={18}
-                  alt={item.label}
-                  src={item.icon}
-                  className={`mr-3 ${
-                    pathname === item.href
-                      ? "filter brightness-0 saturate(100%) invert(36%) sepia(89%) saturate(1045%) hue-rotate(224deg) brightness(93%) contrast(93%)"
-                      : ""
-                  }`}
-                />
-                <span>{item.label}</span>
-              </Link>
-            ))}
+          <div className="hidden md:flex rounded-xl bg-gray-200 w-30 justify-between items-center">
+            <input
+              type="text"
+              placeholder="searching..."
+              className="rounded-lg w-26 bg-gray-200 focus:outline-none pl-2 "
+            />
+            <Image
+              src="/icons/searching.png"
+              alt="searching icon"
+              width={20}
+              className="bg-transparent w-4 h-4  outline-none"
+              height={20}
+            ></Image>
           </div>
         </div>
       </div>
-    </nav>
+      {/* rightmenu */}
+      <div className="flex items-center gap-4 xl:gap-8 justify-end">
+        <ClerkLoading>
+          <div className="w-4 h-4 border-2 border-gray-500 border-t-blue-500 rounded-full animate-spin"></div>
+        </ClerkLoading>
+
+        <ClerkLoaded>
+          {" "}
+          <SignedIn>
+            <div className="cursor-pointer">
+              <Image
+                src="/icons/people.png"
+                alt="profile image"
+                width={20}
+                height={20}
+              ></Image>
+            </div>
+            <div className="cursor-pointer">
+              <Image
+                src="/icons/comment.png"
+                alt="profile image"
+                width={20}
+                height={20}
+              ></Image>
+            </div>
+            <div className="cursor-pointer">
+              <Image
+                src="/icons/notification.png"
+                alt="profile image"
+                width={20}
+                height={20}
+              ></Image>
+            </div>
+            <UserButton />
+          </SignedIn>
+          <SignedOut>
+            <div className="flex gap-2">
+              <Image
+                src="/icons/profile.png"
+                alt="profile image"
+                width={20}
+                height={20}
+              ></Image>
+              <Link href="/sign-in">Login/Register</Link>
+            </div>
+          </SignedOut>
+        </ClerkLoaded>
+        <MobileMenu />
+      </div>
+    </div>
   );
 }
+
+

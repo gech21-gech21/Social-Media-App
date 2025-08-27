@@ -1,23 +1,13 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { verifyToken } from "@/lib/jwt";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  if (!pathname.startsWith("/api/private")) return NextResponse.next();
-
-  const auth = req.headers.get("authorization");
-  const token = auth?.replace("Bearer ", "") || "";
-
-  try {
-    verifyToken(token);
-    return NextResponse.next();
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-}
+export default clerkMiddleware();
 
 export const config = {
-  matcher: ["/api/private/:path*"],
+  matcher: [
+    // Protect specific routes - this is the new way
+    "/setting(.*)",
+    // Run middleware on all routes except static files
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
 };
