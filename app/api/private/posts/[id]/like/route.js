@@ -3,18 +3,31 @@ import { prisma } from "@/lib/prisma";
 import { getUserId } from "@/lib/auth";
 
 export async function POST(_req, { params }) {
-  const userId = getUserId();
-  const { id: postId } = params;
+  try {
+    const userId = getUserId();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const existing = await prisma.like.findUnique({
-    where: { postId_userId: { postId, userId } },
-  });
+    const { id: postId } = params;
 
-  if (existing) {
-    await prisma.like.delete({ where: { postId_userId: { postId, userId } } });
-    return NextResponse.json({ liked: false });
-  } else {
-    await prisma.like.create({ data: { postId, userId } });
-    return NextResponse.json({ liked: true });
+    // Ensure the post exists
+    const postExists = await prisma.post.findUnique({ where: { id: postId } });
+    if (!postExists) return NextResponse.json({ error: "Post not found" }, { status: 404 });
+
+    // Toggle like
+    const existing = await prisma.like.findUnique({
+      where: { postId_userId: { postId, userId } },
+    });
+
+    if (existing) {
+      await prisma.like.delete({ where: { postId_userId: { postId, userId } } });
+      const likeCount = await prisma.like.count({ where: { postId } });
+      return NextResponse.json({ liked: false, likeCount });
+    } else {
+      await prisma.like.create({ data: { postId, userId } });
+      const likeCount = await prisma.like.count({ where: { postId } });
+      return NextResponse.json({ liked: true, likeCount });
+    }
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
