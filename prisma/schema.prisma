@@ -11,10 +11,13 @@ datasource db {
 
 // 3️⃣ Models
 model User {
-  id                   String           @id @unique
+ id        String   @id @default(cuid())
+  email     String   @unique
+  password  String 
   avatar               String?
   name                 String?
   surname              String?
+  username           String
   description          String?
   city                 String?
   country              String?
