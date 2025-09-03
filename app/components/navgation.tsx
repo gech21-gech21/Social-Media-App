@@ -1,17 +1,15 @@
 
-"use client";
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MobileMenu from "./MobileMenu";
-
 import {
   ClerkLoading,
-  ClerkLoaded,
-  UserButton,
   SignedIn,
+  ClerkLoaded,
   SignedOut,
+  UserButton,
 } from "@clerk/nextjs";
+
 export default function Navbar() {
   return (
     <div className="flex  justify-between w-full">
@@ -44,7 +42,7 @@ export default function Navbar() {
             ></Image>
             <span>Friends</span>
           </Link>
-          <Link className=" flex gap-2 items-center" href="/">
+          <Link className=" flex gap-2 items-center" href="../component/stories.tsx">
             <Image
               alt="home page image"
               src="/icons/story.png"
@@ -71,14 +69,13 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      {/* rightmenu */}
-      <div className="flex items-center gap-4 xl:gap-8 justify-end">
-        <ClerkLoading>
-          <div className="w-4 h-4 border-2 border-gray-500 border-t-blue-500 rounded-full animate-spin"></div>
-        </ClerkLoading>
 
+      {/* rightmenu */}
+      <div className="w-[30%] flex items-center gap-4 xl:gap-8 justify-end">
+        <ClerkLoading>
+          <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"></div>
+        </ClerkLoading>
         <ClerkLoaded>
-          {" "}
           <SignedIn>
             <div className="cursor-pointer">
               <Image
@@ -104,17 +101,20 @@ export default function Navbar() {
                 height={20}
               ></Image>
             </div>
+
+           
             <UserButton />
           </SignedIn>
+
           <SignedOut>
-            <div className="flex gap-2">
+            <div className="flex text-sm items-center gap-2">
               <Image
                 src="/icons/profile.png"
                 alt="profile image"
                 width={20}
                 height={20}
               ></Image>
-              <Link href="/sign-in">Login/Register</Link>
+              <Link href="/sign-in" className="text-blue-700 cursor-pointer">login/register</Link>
             </div>
           </SignedOut>
         </ClerkLoaded>
@@ -123,5 +123,3 @@ export default function Navbar() {
     </div>
   );
 }
-
-

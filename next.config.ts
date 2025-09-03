@@ -3,7 +3,17 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["images.pexels.com"], // allow Next.js to load images from Pexels
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.pexels.com", // Specific domain for Pexels
+      },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com", // For Clerk avatars/images
+      },
+      // Add other domains as needed
+    ],
   },
 };
 

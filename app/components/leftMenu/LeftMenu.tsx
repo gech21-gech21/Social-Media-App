@@ -17,7 +17,7 @@ const menuItems = [
   { href: "/", icon: "/icons/news.png", label: "News" },
   { href: "/", icon: "/icons/courses.png", label: "Courses" },
   { href: "/", icon: "/icons/lists.png", label: "Lists" },
-  { href: "/", icon: "/icons/settings.png", label: "Settings" },
+  { href: "/setting", icon: "/icons/settings.png", label: "Settings" },
 ];
 
 const LeftMenu = ({ type }: LeftMenuProps) => {

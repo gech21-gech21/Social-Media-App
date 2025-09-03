@@ -1,114 +1,79 @@
 "use client";
 
-import Image from "next/image";
-import { useState, ChangeEvent } from "react";
+import React, { useOptimistic, useState } from 'react';
+import { Story, User } from "@prisma/client";
+import Image from 'next/image';
+import { CldUploadWidget } from "next-cloudinary"; // Make sure this is imported correctly
+import { useUser } from "@clerk/nextjs"; // Import useUser if you're using Clerk
 
-// Simple Story + User shape (no Prisma, no backend)
-interface UserType {
-  id: string;
-  username: string;
-  avatar: string;
-  name?: string;
-}
+type StoryWithUser = Story & {
+  user: User;
+};
 
-interface StoryType {
-  id: string | number;
-  img: string;
-  createdAt: Date;
-  expiresAt: Date;
-  userId: string;
-  user: UserType;
-}
+const StoryList = ({ stories, userId }: { stories: StoryWithUser[], userId: string }) => {
+  const [storyList, setStoryList] = useState(stories);
+  const [img, setImg] = useState<any>();
+  const user = useUser();
+  
+  const add = async () => {
+    if (!img?.secure_url) return;
 
-const StoryList = ({
-  stories,
-  userId,
-}: {
-  stories: StoryType[];
-  userId: string;
-}) => {
-  const [storyList, setStoryList] = useState<StoryType[]>(stories);
-  const [img, setImg] = useState<string | null>(null);
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setImg(url);
+    // Use optimistic updates
+    addOptimisticStory();
+    
+    try {
+      await addStory(img.secure_url); // Make sure to define this function
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const add = () => {
-    if (!img) return;
-
-    const newStory: StoryType = {
-      id: Math.random(),
-      img: img,
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hrs
-      userId,
-      user: {
-        id: userId,
-        username: "You",
-        avatar: "/noAvatar.png",
-      },
-    };
-
-    setStoryList((prev) => [newStory, ...prev]);
-    setImg(null);
-  };
+  const [optimisticStories, addOptimistic] = useOptimistic(storyList, {
+    state: (value: StoryWithUser[]) => [value, ...optimisticStories], // Adjust this line as necessary
+  });
 
   return (
-    <>
-      {/* Upload input */}
-      <div className="flex flex-col items-center gap-2 cursor-pointer relative">
-        <label htmlFor="story-upload">
-          <Image
-            src={img || "/noAvatar.png"}
-            alt="preview"
-            width={80}
-            height={80}
-            className="w-20 h-20 rounded-full ring-2 object-cover cursor-pointer"
-          />
-        </label>
-        <input
-          id="story-upload"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-
-        {img ? (
-          <button
-            onClick={add}
-            className="text-xs bg-blue-500 p-1 rounded-md text-white"
-          >
-            Send
-          </button>
-        ) : (
-          <span className="font-medium">Add a Story</span>
+    <div>
+      <CldUploadWidget 
+        uploadPreset="newsocialmedia"
+        onSuccess={(result) => {
+          setImg(result.info);
+        }}
+      >
+        {({ open }) => (
+          <div className="flex items-center gap-2 cursor-pointer relative" onClick={() => open()}>
+            <Image
+              src={user.user?.avatar || "/icons/profile.png"}
+              alt="image of the profile"
+              width={50}
+              height={60}
+              className="w-20 rounded-full ring-2 object-cover"
+            />
+            {img ? (
+              <form onSubmit={add}>
+                <button type="submit" className='text-xl bg-blue-500 rounded-md p-1 text-white'>Post</button>
+              </form>
+            ) : (
+              <span className="font-medium">Add a story</span>
+            )}
+            <div className='text-5xl absolute text-gray-100 top-1'>+</div>
+          </div>
         )}
-        <div className="absolute text-6xl text-gray-200 top-1">+</div>
-      </div>
+      </CldUploadWidget>
 
-      {/* STORY LIST */}
-      {storyList.map((story) => (
-        <div
-          className="flex flex-col items-center gap-2 cursor-pointer"
-          key={story.id}
-        >
+      {optimisticStories.map(story => (
+        <div className="flex items-center gap-2 cursor-pointer" key={story.id}>
           <Image
-            src={story.img || story.user.avatar || "/noAvatar.png"}
-            alt=""
-            width={80}
-            height={80}
-            className="w-20 h-20 rounded-full ring-2 object-cover"
+            src={story.user.avatar || "/icons/profile.png"}
+            alt="image of the profile"
+            width={50}
+            height={60}
+            className="w-20 rounded-full ring-2"
           />
-          <span className="font-medium">{story.user.username}</span>
+          <span className="font-medium">{story.user.name || story.user.username}</span>
         </div>
       ))}
-    </>
+    </div>
   );
 };
 

@@ -1,71 +1,93 @@
+"use client"
+
 import Image from "next/image";
-import React from "react";
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import React, { useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { CldUploadWidget } from "next-cloudinary";
+import AddpostButton from "../components/AddpostButton";
+import { addPost } from "@/lib/action";
 
-const AddPost = async () => {
-  const { userId } = await auth();
-  console.log(userId);
+const AddPost = () => {
+  const { isLoaded, user } = useUser();
+  const [desc, setDesc] = useState("");
+  const [img, setImg] = useState<any>();
 
- const testaction = async (FormData: FormData) => {
-  "use server";
-  if (!userId) return;
-  const desc = FormData.get("desc") as string;
-  
-  
-};
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  const handleSubmit = (formData: FormData) => {
+    addPost(formData, img?.secure_url || "");
+  };
 
   return (
-    <div className="bg-white rounded-lg flex gap-4 justify-between pt-4 text-sm">
+    <div className="bg-white rounded-lg flex gap-4 justify-between pt-4 text-sm p-4 mb-4 shadow-sm">
       <Image
-        alt=""
-        src="/icons/background.png"
+        alt="User avatar"
+        src={user?.imageUrl || "/icons/background.png"}
         height={48}
         width={48}
         className="w-12 h-12 object-cover rounded-full"
       />
 
-      <div className="flex-1 cursor-pointer">
-        <form action="" className="flex gap-4">
+      <div className="flex-1">
+        <form action={handleSubmit} className="flex flex-col gap-4">
           <textarea
-            placeholder="What is on mind"
+            placeholder="What is on your mind?"
             name="desc"
-            className="bg-gray-300 w-[95%] rounded-2xl pl-3 pt-5 focus:outline-none focus:border-none"
+            required
+            className="bg-gray-100 w-full rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+            rows={3}
+            onChange={(e) => setDesc(e.target.value)}
           ></textarea>
-          <button>post</button>
+          <AddpostButton />
         </form>
-
-        <div className="flex items-center justify-between mt-4 text-gray-400 flex-wrap">
-          <div className="flex cursor-pointer gap-1">
+        
+        <div className="flex items-center justify-between mt-2 text-gray-500 flex-wrap">
+          <CldUploadWidget 
+            uploadPreset="newsocialmedia"
+            onSuccess={(result: any, widget: any) => {
+              setImg(result.info);
+              widget.close();
+            }}
+          >
+            {({ open }) => (
+              <div 
+                className="flex cursor-pointer gap-1 hover:text-blue-500 transition-colors" 
+                onClick={() => open()}
+              >
+                <Image
+                  alt="Photo icon"
+                  src="/icons/photoicone.png"
+                  height={17}
+                  width={15}
+                />
+                <span>Photo</span>
+              </div>
+            )}
+          </CldUploadWidget>
+          
+          <div className="flex cursor-pointer gap-1 hover:text-blue-500 transition-colors">
             <Image
-              alt=""
-              src="/icons/photoicone.png"
-              height={17}
-              width={15}
-            />
-            <span>Photo</span>
-          </div>
-          <div className="flex cursor-pointer gap-1">
-            <Image
-              alt=""
+              alt="Video icon"
               src="/icons/vedio.png"
               height={17}
               width={15}
             />
-            <span>Vedio</span>
+            <span>Video</span>
           </div>
-          <div className="flex cursor-pointer gap-1">
+          <div className="flex cursor-pointer gap-1 hover:text-blue-500 transition-colors">
             <Image
-              alt=""
+              alt="Poll icon"
               src="/icons/poll.png"
               height={17}
               width={15}
             />
             <span>Poll</span>
           </div>
-          <div className="flex gap-1 cursor-pointer">
+          <div className="flex gap-1 cursor-pointer hover:text-blue-500 transition-colors">
             <Image
-              alt=""
+              alt="Event icon"
               src="/icons/event.png"
               height={17}
               width={15}

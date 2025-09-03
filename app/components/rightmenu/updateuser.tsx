@@ -1,41 +1,40 @@
 "use client";
-
 import { User } from "@prisma/client";
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import UpdateButton from "../components/rightmenu/UpdateButton";
+import UpdateButton from "./UpdateButton";
 import { CldUploadWidget } from "next-cloudinary";
 import { useForm } from "react-hook-form";
 
 const updateProfile = async (formData: any) => {
+
   console.log("Updating profile with:", formData);
   return { success: true, error: false }; // Simulate success
 };
 
-const UpdateUser = ({ user }: { user?: User }) => {
-  // Handle case where user is undefined
+const UpdateUser = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
-  const [cover, setCover] = useState(user?.cover || ""); // Use optional chaining
+  const [cover, setCover] = useState(user.cover || "");
   const router = useRouter();
 
   const { register, handleSubmit, formState } = useForm({
     defaultValues: {
-      name: user?.name || "", // Use optional chaining
-      surname: user?.surname || "",
-      description: user?.description || "",
-      city: user?.city || "",
-      school: user?.school || "",
-      work: user?.work || "",
-      website: user?.website || "",
+      name: user.name || "",
+      surname: user.surname || "",
+      description: user.description || "",
+      city: user.city || "",
+      school: user.school || "",
+      work: user.work || "",
+      website: user.website || "",
     },
   });
 
   const onSubmit = async (formData: any) => {
     const result = await updateProfile(formData);
     if (result.success) {
-      router.refresh();
-      setOpen(false);
+      router.refresh(); // Refresh the page to show updated data
+      setOpen(false); // Close the modal
     }
   };
 
@@ -46,13 +45,13 @@ const UpdateUser = ({ user }: { user?: User }) => {
   return (
     <div>
       <span
-        className="text-blue-700 text-xs cursor-pointer flex text-center justify-center mt-30"
+        className="text-blue-700 text-xs cursor-pointer"
         onClick={() => setOpen(true)}
       >
-        update Profile information
+        update
       </span>
       {open && (
-        <div className=" fixed inset-0 bg-black bg-opacity-65 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-65 flex items-center justify-center z-50">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="p-6 bg-white rounded-lg shadow-md flex flex-col gap-4 w-full max-w-md max-h-[80vh] overflow-y-auto relative"
@@ -110,6 +109,7 @@ const UpdateUser = ({ user }: { user?: User }) => {
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-gray-500">Description</label>
                 <input
+                
                   type="text"
                   {...register("description")}
                   placeholder="Life is Beautiful"
@@ -159,6 +159,11 @@ const UpdateUser = ({ user }: { user?: User }) => {
             {formState.isSubmitSuccessful && (
               <span className="text-green-500 text-sm">
                 Profile has been updated!
+              </span>
+            )}
+            {formState.errors && (
+              <span className="text-red-500 text-sm">
+                Something went wrong!
               </span>
             )}
 

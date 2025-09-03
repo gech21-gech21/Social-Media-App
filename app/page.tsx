@@ -1,7 +1,8 @@
-import Feed from "./components/feed";
+import Feed from "./components/feed/feed";
 import LeftMenu from "@/app/components/leftMenu/LeftMenu";
-import Rightmenu from "./components/Rightmenu";
+import Rightmenu from "./components/rightmenu/Rightmenu";
 import Addpost from "./components/addpost";
+import Story from "./components/Stories";
 export default function Home() {
   return (
     <div className="flex justify-center w-full pt-6">
@@ -11,6 +12,10 @@ export default function Home() {
         </div>
 
         <div className="w-full md:w-[50%]">
+          <div className="w-full shadow-2xl m-2 ">
+            {" "}
+            <Story />
+          </div>
           <div className="">
             {" "}
             <Addpost />
