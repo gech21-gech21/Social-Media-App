@@ -5,9 +5,9 @@ import React, { useState } from 'react'
 const PostInfo = ({ postId }: { postId: number }) => {
   const [open, setOpen] = useState(false)
   
-  // Assuming you have a deletePost function imported
+
   const deletePostWithId = () => {
-    // Your delete post logic here
+
     console.log("Delete post with ID:", postId)
   }
 

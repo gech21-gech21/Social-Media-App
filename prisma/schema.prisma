@@ -17,12 +17,11 @@ model User {
   avatar               String?
   name                 String?
   surname              String?
-   
   username           String
   description          String?
   city                 String?
   country              String?
-  school             String?
+ school             String?
 website                String?
   cover                String?
   createdAt            DateTime         @default(now())
@@ -63,7 +62,6 @@ model Comment {
   userId    String    // Changed to String
   postId    Int
 }
-
 model Like {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
@@ -82,7 +80,6 @@ model FollowRequest {
   receiverId String 
   sender     User     @relation("followRequestsSent", fields: [senderId], references: [id], onDelete: Cascade)
   receiver   User     @relation("followRequestsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
-  
   @@unique([senderId, receiverId])
 }
 
@@ -91,7 +88,6 @@ model Block {
   createdAt  DateTime @default(now())
   blockedId  String
   blockerId  String
-  
   blocker    User     @relation("BlocksSent", fields: [blockerId], references: [id], onDelete: Cascade)
   blocked    User     @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
 }
@@ -101,7 +97,6 @@ model Follower {
   createdAt    DateTime @default(now())
   followerId   String
   followingId  String
-  
   follower     User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
   following    User     @relation("UserFollowings", fields: [followingId], references: [id], onDelete: Cascade)
 }

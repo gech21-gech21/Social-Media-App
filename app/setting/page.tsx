@@ -1,3 +1,4 @@
+
 "use client";
 
 import { User } from "@prisma/client";
@@ -14,7 +15,7 @@ const updateProfile = async (formData: any) => {
 };
 
 const UpdateUser = ({ user }: { user?: User }) => {
-  // Handle case where user is undefined
+
   const [open, setOpen] = useState(false);
   const [cover, setCover] = useState(user?.cover || ""); // Use optional chaining
   const router = useRouter();
@@ -59,7 +60,7 @@ const UpdateUser = ({ user }: { user?: User }) => {
           >
             <h1 className="text-xl font-bold">Update Profile</h1>
 
-            {/* Cover Picture */}
+            
             <CldUploadWidget
               uploadPreset="socialmedia"
               onSuccess={(result: any) => setCover(result.info.secure_url)}
@@ -177,3 +178,4 @@ const UpdateUser = ({ user }: { user?: User }) => {
 };
 
 export default UpdateUser;
+
