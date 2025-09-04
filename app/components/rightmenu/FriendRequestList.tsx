@@ -1,44 +1,50 @@
-"use client"
-import { User, FollowRequest } from "@prisma/client"
-import Image from "next/image"
-import React, { useOptimistic } from 'react'
+"use client";
+import { User, FollowRequest } from "@prisma/client";
+import Image from "next/image";
+import React, { useOptimistic } from "react";
+import { acceptFollowRequest, declineFollowRequest } from "@/lib/action";
 
 type RequestWithUser = FollowRequest & {
-  sender: User
-}
+  sender: User;
+};
 
 const FriendRequestList = ({ requests }: { requests: RequestWithUser[] }) => {
   const [optimisticRequests, removeOptimisticRequest] = useOptimistic(
     requests,
     (state, requestId: number) => state.filter((req) => req.id !== requestId)
-  )
+  );
 
-  const accept = async (requestId: number, userId: string) => {
-    removeOptimisticRequest(requestId)
-    
-    try {
-      // You'll need to implement this function
-      await acceptFollowRequest(userId) 
-    } catch (error) {
-      console.error("Error accepting request:", error)
-    }
-  }
+  const accept = async (requestId: number, senderId: string) => {
+    // Start transition for the optimistic update
+    removeOptimisticRequest(requestId);
 
-  const decline = async (requestId: number, userId: string) => {
-    removeOptimisticRequest(requestId)
-    
     try {
-      // You'll need to implement this function
-      await declineFollowRequest(userId) 
+      await acceptFollowRequest(senderId);
     } catch (error) {
-      console.error("Error declining request:", error)
+      console.error("Error accepting request:", error);
+      // Optionally, you can add error handling here, like reverting the optimistic state
     }
-  }
+  };
+
+  const decline = async (requestId: number, senderId: string) => {
+    // Start transition for the optimistic update
+    removeOptimisticRequest(requestId);
+
+    try {
+      await declineFollowRequest(senderId);
+    } catch (error) {
+      console.error("Error declining request:", error);
+      // Optionally, you can add error handling here, like reverting the optimistic state
+    }
+  };
 
   return (
     <div>
       {optimisticRequests.map((request) => (
-        <div className="flex items-center justify-between p-4 border-b" key={request.id}>
+        <div
+          className="flex items-center justify-between p-4 border-b"
+          key={request.id}
+        >
           <div className="flex items-center gap-3">
             <Image
               src={request.sender.avatar || "/icons/profile.png"}
@@ -48,15 +54,13 @@ const FriendRequestList = ({ requests }: { requests: RequestWithUser[] }) => {
               className="rounded-full object-cover h-8 w-8"
             />
             <span className="text-sm font-medium">
-              {request.sender.name && request.sender.surname 
+              {request.sender.name && request.sender.surname
                 ? `${request.sender.name} ${request.sender.surname}`
-                : request.sender.username
-              }
+                : request.sender.username}
             </span>
           </div>
-
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={() => accept(request.id, request.sender.id)}
               className="p-2 bg-green-100 rounded-full hover:bg-green-200 transition-colors"
             >
@@ -67,8 +71,7 @@ const FriendRequestList = ({ requests }: { requests: RequestWithUser[] }) => {
                 height={16}
               />
             </button>
-            
-            <button 
+            <button
               onClick={() => decline(request.id, request.sender.id)}
               className="p-2 bg-red-100 rounded-full hover:bg-red-200 transition-colors"
             >
@@ -82,25 +85,11 @@ const FriendRequestList = ({ requests }: { requests: RequestWithUser[] }) => {
           </div>
         </div>
       ))}
-      
       {optimisticRequests.length === 0 && (
-        <div className="p-4 text-center text-gray-500">
-          No friend requests
-        </div>
+        <div className="p-4 text-center text-gray-500">No friend requests</div>
       )}
     </div>
-  )
-}
+  );
+};
 
-// Placeholder functions - you'll need to implement these
-async function acceptFollowRequest(userId: string) {
-  // Implementation for accepting follow request
-  console.log("Accepting request from:", userId)
-}
-
-async function declineFollowRequest(userId: string) {
-  // Implementation for declining follow request
-  console.log("Declining request from:", userId)
-}
-
-export default FriendRequestList 
+export default FriendRequestList;

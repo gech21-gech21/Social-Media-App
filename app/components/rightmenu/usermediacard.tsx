@@ -17,29 +17,32 @@ const UserMediaCard = async ({ user }: { user: User | null | undefined }) => {
         <div className="flex justify-between items-center font-medium mb-4">
           <span className="text-gray-500">User Media</span>
         </div>
-        <div className="text-center text-gray-500 py-4">
-          User not available
-        </div>
+        <div className="text-center text-gray-500 py-4">User not available</div>
       </div>
     );
   }
 
   try {
     // Fetch posts with images
-    const postMedia = await prisma.post.findMany({
+    const postMedia = (await prisma.post.findMany({
       where: {
         userId: user.id,
-        img: { not: null },
+        img: {
+          not: "", // Ensure img is not an empty string
+        },
       },
       take: 8,
       orderBy: { createdAt: "desc" },
-    }) as PostWithImage[];
+    })) as PostWithImage[];
 
     return (
       <div className="shadow-lg rounded-2xl p-4 bg-white">
         <div className="flex justify-between items-center font-medium mb-4">
           <span className="text-gray-500">User Media</span>
-          <Link className="text-blue-500 text-sm" href={`/user/${user.username}/media`}>
+          <Link
+            className="text-blue-500 text-sm"
+            href={`/user/${user.username}/media`}
+          >
             See all
           </Link>
         </div>
@@ -54,10 +57,7 @@ const UserMediaCard = async ({ user }: { user: User | null | undefined }) => {
                   fill
                   className="object-cover rounded-md"
                   sizes="(max-width: 768px) 20vw, 10vw"
-                  onError={(e) => {
-                    // Fallback if image fails to load
-                    e.currentTarget.style.display = 'none';
-                  }}
+                  // REMOVED: onError event handler (not allowed in Server Components)
                 />
               </div>
             ))

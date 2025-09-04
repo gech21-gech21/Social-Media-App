@@ -1,78 +1,132 @@
 "use client";
 
-import React, { useOptimistic, useState } from 'react';
-import { Story, User } from "@prisma/client";
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { CldUploadWidget } from "next-cloudinary"; // Make sure this is imported correctly
-import { useUser } from "@clerk/nextjs"; // Import useUser if you're using Clerk
+import { CldUploadWidget, CloudinaryUploadWidgetResults } from "next-cloudinary";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from 'next/navigation';
+import { addStory } from '../../lib/action';
 
-type StoryWithUser = Story & {
-  user: User;
+// Type that matches your exact Prisma schema
+type StoryWithUser = {
+  id: number;
+  img: string;
+  createdAt: Date;
+  expiresAt: Date;
+  userId: string;
+  user: {
+    id: string;
+    email: string;
+    password: string;
+    username: string;
+    name: string | null;
+    surname: string | null;
+    avatar: string | null;
+    description: string | null;
+    work: string | null;
+    school: string | null;
+    website: string | null;
+    city: string | null;
+    country: string | null;
+    cover: string | null;
+    createdAt: Date;
+  };
 };
 
 const StoryList = ({ stories, userId }: { stories: StoryWithUser[], userId: string }) => {
-  const [storyList, setStoryList] = useState(stories);
-  const [img, setImg] = useState<any>();
-  const user = useUser();
+  const [img, setImg] = useState<string | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
+  const { user: clerkUser } = useUser();
+  const router = useRouter();
   
-  const add = async () => {
-    if (!img?.secure_url) return;
+  const add = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!img) return;
 
-    // Use optimistic updates
-    addOptimisticStory();
+    setIsPosting(true);
     
     try {
-      await addStory(img.secure_url); // Make sure to define this function
+      await addStory(img);
+      router.push('/');
+      router.refresh();
     } catch (error) {
-      console.log(error);
+      console.log('Failed to post story:', error);
+    } finally {
+      setIsPosting(false);
     }
   };
 
-  const [optimisticStories, addOptimistic] = useOptimistic(storyList, {
-    state: (value: StoryWithUser[]) => [value, ...optimisticStories], // Adjust this line as necessary
-  });
+  const handleUploadSuccess = (results: CloudinaryUploadWidgetResults) => {
+    if (typeof results.info === 'string') {
+      setImg(results.info);
+    } else if (results.info && typeof results.info === 'object' && 'secure_url' in results.info) {
+      setImg(results.info.secure_url || null);
+    }
+  };
 
   return (
-    <div>
-      <CldUploadWidget 
-        uploadPreset="newsocialmedia"
-        onSuccess={(result) => {
-          setImg(result.info);
-        }}
-      >
-        {({ open }) => (
-          <div className="flex items-center gap-2 cursor-pointer relative" onClick={() => open()}>
-            <Image
-              src={user.user?.avatar || "/icons/profile.png"}
-              alt="image of the profile"
-              width={50}
-              height={60}
-              className="w-20 rounded-full ring-2 object-cover"
-            />
-            {img ? (
-              <form onSubmit={add}>
-                <button type="submit" className='text-xl bg-blue-500 rounded-md p-1 text-white'>Post</button>
-              </form>
-            ) : (
-              <span className="font-medium">Add a story</span>
-            )}
-            <div className='text-5xl absolute text-gray-100 top-1'>+</div>
-          </div>
-        )}
-      </CldUploadWidget>
+    <div className="w-full overflow-x-auto scrollbar-hide">
+      <div className="flex space-x-4 p-4 min-w-max">
+        {/* Upload widget */}
+        <CldUploadWidget 
+          uploadPreset="social"
+          onSuccess={handleUploadSuccess}
+        >
+          {({ open }) => (
+            <div 
+              className="flex flex-col items-center cursor-pointer relative shrink-0"
+              onClick={() => open()}
+            >
+              <div className="relative">
+                <Image
+                  src={clerkUser?.imageUrl || "/icons/profile.png"}
+                  alt="image of the profile"
+                  width={60}
+                  height={60}
+                  className="w-16 h-16 rounded-full ring-2 ring-white object-cover"
+                />
+                <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-1">
+                  <span className="text-white text-lg font-bold">+</span>
+                </div>
+              </div>
+              {img ? (
+                <form onSubmit={add} className="mt-2">
+                  <button 
+                    type="submit" 
+                    className='text-sm bg-blue-500 rounded-md px-2 py-1 text-white disabled:bg-gray-400'
+                    disabled={isPosting}
+                  >
+                    {isPosting ? 'Posting...' : 'Post'}
+                  </button>
+                </form>
+              ) : (
+                <span className="text-xs mt-1 text-gray-600">Add story</span>
+              )}
+            </div>
+          )}
+        </CldUploadWidget>
 
-      {optimisticStories.map(story => (
-        <div className="flex items-center gap-2 cursor-pointer" key={story.id}>
-          <Image
-            src={story.user.avatar || "/icons/profile.png"}
-            alt="image of the profile"
-            width={50}
-            height={60}
-            className="w-20 rounded-full ring-2"
-          />
-          <span className="font-medium">{story.user.name || story.user.username}</span>
-        </div>
-      ))}
+        {/* Stories list */}
+        {stories.map(story => (
+          <div 
+            key={story.id} 
+            className="flex flex-col items-center shrink-0 cursor-pointer"
+          >
+            <div className="relative">
+              <Image
+                src={story.img || "/icons/profile.png"}
+                alt={`${story.user.name || story.user.username || 'User'}'s story`}
+                width={60}
+                height={60}
+                className="w-16 h-16 rounded-full ring-2 ring-blue-500 object-cover"
+              />
+            </div>
+            <span className="text-xs mt-1 text-gray-600 truncate max-w-[80px]">
+              {story.user.name || story.user.username || "User"}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

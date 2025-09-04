@@ -1,16 +1,42 @@
-"use client"
+"use client";
 
 import Image from "next/image";
 import React, { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { CldUploadWidget } from "next-cloudinary";
+import {
+  CldUploadWidget,
+  CloudinaryUploadWidgetResults,
+  CloudinaryUploadWidgetInfo,
+} from "next-cloudinary";
 import AddpostButton from "../components/AddpostButton";
 import { addPost } from "@/lib/action";
+
+// Define proper types for Cloudinary response
+interface CloudinaryInfoWithSecureUrl extends CloudinaryUploadWidgetInfo {
+  secure_url: string;
+}
+
+// Type guard function without 'any'
+function isCloudinaryInfoWithSecureUrl(
+  info: unknown
+): info is CloudinaryInfoWithSecureUrl {
+  return (
+    typeof info === "object" &&
+    info !== null &&
+    "secure_url" in info &&
+    typeof (info as CloudinaryInfoWithSecureUrl).secure_url === "string"
+  );
+}
+
+// Define type for the widget parameter
+interface CloudinaryWidget {
+  close: () => void;
+}
 
 const AddPost = () => {
   const { isLoaded, user } = useUser();
   const [desc, setDesc] = useState("");
-  const [img, setImg] = useState<any>();
+  const [img, setImg] = useState<{ secure_url?: string } | null>(null);
 
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -18,6 +44,16 @@ const AddPost = () => {
 
   const handleSubmit = (formData: FormData) => {
     addPost(formData, img?.secure_url || "");
+  };
+
+  const handleUploadSuccess = (
+    result: CloudinaryUploadWidgetResults,
+    widget: CloudinaryWidget
+  ) => {
+    if (result?.info && isCloudinaryInfoWithSecureUrl(result.info)) {
+      setImg({ secure_url: result.info.secure_url });
+    }
+    widget.close();
   };
 
   return (
@@ -42,18 +78,15 @@ const AddPost = () => {
           ></textarea>
           <AddpostButton />
         </form>
-        
+
         <div className="flex items-center justify-between mt-2 text-gray-500 flex-wrap">
-          <CldUploadWidget 
-            uploadPreset="newsocialmedia"
-            onSuccess={(result: any, widget: any) => {
-              setImg(result.info);
-              widget.close();
-            }}
+          <CldUploadWidget
+            uploadPreset="social"
+            onSuccess={handleUploadSuccess}
           >
             {({ open }) => (
-              <div 
-                className="flex cursor-pointer gap-1 hover:text-blue-500 transition-colors" 
+              <div
+                className="flex cursor-pointer gap-1 hover:text-blue-500 transition-colors"
                 onClick={() => open()}
               >
                 <Image
@@ -66,7 +99,7 @@ const AddPost = () => {
               </div>
             )}
           </CldUploadWidget>
-          
+
           <div className="flex cursor-pointer gap-1 hover:text-blue-500 transition-colors">
             <Image
               alt="Video icon"

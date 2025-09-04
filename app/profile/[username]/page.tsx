@@ -8,14 +8,12 @@ import { auth } from "@clerk/nextjs/server";
 import UserInfoCard from "@/app/components/rightmenu/userinfocard";
 import UserMediaCard from "@/app/components/rightmenu/usermediacard";
 
-// Add this type for the params
 interface PageProps {
   params: Promise<{ username: string }>;
 }
 
 const ProfilePage = async (props: PageProps) => {
   try {
-    // Use React.use() to unwrap the params promise
     const params = await props.params;
     const username = params.username;
 
@@ -54,7 +52,6 @@ const ProfilePage = async (props: PageProps) => {
       isBlocked = !!blockRelation;
     }
 
-    // Show not found if there's a block relationship
     if (isBlocked) return notFound();
 
     return (
@@ -67,7 +64,7 @@ const ProfilePage = async (props: PageProps) => {
             <div className="flex flex-col items-center justify-center">
               <div className="w-full h-64 mt-4 relative">
                 <Image
-                  src={user.cover || "/icons/backgroundprofile.jpg"}
+                  src={user.cover || "/icons/bacgroudprofile.jpg"}
                   alt="Cover image"
                   fill
                   className="rounded-md object-cover"

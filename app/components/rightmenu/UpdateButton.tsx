@@ -1,18 +1,12 @@
-"use client";
-import React from "react";
-import { useFormStatus } from "react-dom";
-
-const UpdateButton = () => {
-  const { pending } = useFormStatus();
-  
+// components/UpdateButton.tsx
+const UpdateButton = ({ isSubmitting }: { isSubmitting: boolean }) => {
   return (
     <button
-      className="bg-blue-500 p-2 mt-2 rounded-md text-white disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
       type="submit"
-      disabled={pending}
-      aria-disabled={pending}
+      disabled={isSubmitting}
+      className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      {pending ? "Updating..." : "Update"}
+      {isSubmitting ? "Updating..." : "Update Profile"}
     </button>
   );
 };
