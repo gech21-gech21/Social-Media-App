@@ -1,143 +1,78 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
-import {
-  CldUploadWidget,
-  CloudinaryUploadWidgetResults,
-} from "next-cloudinary";
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { addStory } from "../../lib/action";
+import React, { useOptimistic, useState } from 'react';
+import { Story, User } from "@prisma/client";
+import Image from 'next/image';
+import { CldUploadWidget } from "next-cloudinary"; // Make sure this is imported correctly
+import { useUser } from "@clerk/nextjs"; // Import useUser if you're using Clerk
 
-
-type StoryWithUser = {
-  id: number;
-  img: string;
-  createdAt: Date;
-  expiresAt: Date;
-  userId: string;
-  user: {
-    id: string;
-    email: string;
-    password: string;
-    username: string;
-    name: string | null;
-    surname: string | null;
-    avatar: string | null;
-    description: string | null;
-    work: string | null;
-    school: string | null;
-    website: string | null;
-    city: string | null;
-    country: string | null;
-    cover: string | null;
-    createdAt: Date;
-  };
+type StoryWithUser = Story & {
+  user: User;
 };
 
-const StoryList = ({
-  stories,
-  userId,
-}: {
-  stories: StoryWithUser[];
-  userId: string;
-}) => {
-  const [img, setImg] = useState<string | null>(null);
-  const [isPosting, setIsPosting] = useState(false);
-  const { user: clerkUser } = useUser();
-  const router = useRouter();
+const StoryList = ({ stories, userId }: { stories: StoryWithUser[], userId: string }) => {
+  const [storyList, setStoryList] = useState(stories);
+  const [img, setImg] = useState<any>();
+  const user = useUser();
+  
+  const add = async () => {
+    if (!img?.secure_url) return;
 
-  const add = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!img) return;
-
-    setIsPosting(true);
-
+    // Use optimistic updates
+    addOptimisticStory();
+    
     try {
-      await addStory(img);
-      router.push("/");
-      router.refresh();
+      await addStory(img.secure_url); // Make sure to define this function
     } catch (error) {
-      console.log("Failed to post story:", error);
-    } finally {
-      setIsPosting(false);
+      console.log(error);
     }
   };
 
-  const handleUploadSuccess = (results: CloudinaryUploadWidgetResults) => {
-    if (typeof results.info === "string") {
-      setImg(results.info);
-    } else if (
-      results.info &&
-      typeof results.info === "object" &&
-      "secure_url" in results.info
-    ) {
-      setImg(results.info.secure_url || null);
-    }
-  };
+  const [optimisticStories, addOptimistic] = useOptimistic(storyList, {
+    state: (value: StoryWithUser[]) => [value, ...optimisticStories], // Adjust this line as necessary
+  });
 
   return (
-    <div className="w-full overflow-x-auto scrollbar-hide">
-      <div className="flex space-x-4 p-4 min-w-max">
-        <CldUploadWidget uploadPreset="social" onSuccess={handleUploadSuccess}>
-          {({ open }) => (
-            <div
-              className="flex flex-col items-center cursor-pointer relative shrink-0"
-              onClick={() => open()}
-            >
-              <div className="relative">
-                <Image
-                  src={clerkUser?.imageUrl || "/icons/profile.png"}
-                  alt="image of the profile"
-                  width={60}
-                  height={60}
-                  className="w-16 h-16 rounded-full ring-2 ring-white object-cover"
-                />
-                <div className="absolute bottom-0 right-0  mt-0 flex items-center justify-center w-8 h-8">
-                  <span className="text-white text-lg font-bold">+</span>
-                </div>
-              </div>
-              {img ? (
-                <form onSubmit={add} className="mt-2">
-                  <button
-                    type="submit"
-                    className="text-sm bg-blue-500 rounded-md px-2 py-1 text-white disabled:bg-gray-400"
-                    disabled={isPosting}
-                  >
-                    {isPosting ? "Posting..." : "Post"}
-                  </button>
-                </form>
-              ) : (
-                <span className="text-xs mt-1 text-gray-600">Add story</span>
-              )}
-            </div>
-          )}
-        </CldUploadWidget>
-
-      
-        {stories.map((story) => (
-          <div
-            key={story.id}
-            className="flex flex-col items-center shrink-0 cursor-pointer"
-          >
-            <div className="relative">
-              <Image
-                src={story.img || "/icons/profile.png"}
-                alt={`${
-                  story.user.name || story.user.username || "User"
-                }'s story`}
-                width={60}
-                height={60}
-                className="w-16 h-16 rounded-full ring-2 ring-blue-500 object-cover"
-              />
-            </div>
-            <span className="text-xs mt-1 text-gray-600 truncate max-w-[80px]">
-              {story.user.name || story.user.username || "User"}
-            </span>
+    <div>
+      <CldUploadWidget 
+        uploadPreset="newsocialmedia"
+        onSuccess={(result) => {
+          setImg(result.info);
+        }}
+      >
+        {({ open }) => (
+          <div className="flex items-center gap-2 cursor-pointer relative" onClick={() => open()}>
+            <Image
+              src={user.user?.avatar || "/icons/profile.png"}
+              alt="image of the profile"
+              width={50}
+              height={60}
+              className="w-20 rounded-full ring-2 object-cover"
+            />
+            {img ? (
+              <form onSubmit={add}>
+                <button type="submit" className='text-xl bg-blue-500 rounded-md p-1 text-white'>Post</button>
+              </form>
+            ) : (
+              <span className="font-medium">Add a story</span>
+            )}
+            <div className='text-5xl absolute text-gray-100 top-1'>+</div>
           </div>
-        ))}
-      </div>
+        )}
+      </CldUploadWidget>
+
+      {optimisticStories.map(story => (
+        <div className="flex items-center gap-2 cursor-pointer" key={story.id}>
+          <Image
+            src={story.user.avatar || "/icons/profile.png"}
+            alt="image of the profile"
+            width={50}
+            height={60}
+            className="w-20 rounded-full ring-2"
+          />
+          <span className="font-medium">{story.user.name || story.user.username}</span>
+        </div>
+      ))}
     </div>
   );
 };

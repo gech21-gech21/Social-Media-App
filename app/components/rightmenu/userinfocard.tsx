@@ -4,14 +4,9 @@ import Image from "next/image";
 import prisma from "@/lib/client";
 import Updateuser from "./updateuser";
 import { auth } from "@clerk/nextjs/server";
-import FriendRequests from "./FriendRequests";
-import UserinfocardInteraction from "../rightmenu/userinfocardInteraction";
+import UserInfocardInteraction from "../rightmenu/userinfocardInteraction";
 
 const UserInfoCard = async ({ userId }: { userId: string }) => {
-  if (!userId) {
-    return <div>No user ID provided</div>;
-  }
-
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
@@ -27,32 +22,36 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
     day: "numeric",
   });
 
-  const { userId: currentUserId } = await auth();
   let isUserBlocked = false;
   let isFollowing = false;
   let isFollowingSent = false;
 
+  const { userId: currentUserId } = await auth();
+
   if (currentUserId) {
-    isUserBlocked = !!(await prisma.block.findFirst({
+    const blockedRes = await prisma.block.findFirst({
       where: {
         blockerId: currentUserId,
         blockedId: user.id,
       },
-    }));
+    });
+    isUserBlocked = !!blockedRes;
 
-    isFollowing = !!(await prisma.follower.findFirst({
+    const followRes = await prisma.follower.findFirst({
       where: {
         followerId: currentUserId,
         followingId: user.id,
       },
-    }));
+    });
+    isFollowing = !!followRes;
 
-    isFollowingSent = !!(await prisma.followRequest.findFirst({
+    const followreq = await prisma.followRequest.findFirst({
       where: {
         senderId: currentUserId,
         receiverId: user.id,
       },
-    }));
+    });
+    isFollowingSent = !!followreq;
   }
 
   return (
@@ -78,6 +77,7 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
         </div>
         {user.description && <p className="text-sm">{user.description}</p>}
       </div>
+
       <div className="mt-4 space-y-2">
         {user.city && (
           <div className="flex gap-4 items-center">
@@ -92,6 +92,7 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </span>
           </div>
         )}
+
         {user.school && (
           <div className="flex gap-4 items-center">
             <Image
@@ -105,6 +106,7 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </span>
           </div>
         )}
+
         {user.work && (
           <div className="flex gap-4 items-center">
             <Image
@@ -118,6 +120,7 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </span>
           </div>
         )}
+
         {user.website && (
           <div className="flex gap-2 items-center mt-2">
             <Image
@@ -135,23 +138,25 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </Link>
           </div>
         )}
+
         <div className="mt-2">
           <span className="text-sm bg-green-200 px-2 py-1 rounded">
             Joined {formattedDate}
           </span>
         </div>
       </div>
+
       {currentUserId && currentUserId !== user.id && (
         <div className="mt-4">
-          <UserinfocardInteraction
+          <UserInfocardInteraction
             userId={user.id}
             currentUserId={currentUserId}
             isUserBlocked={isUserBlocked}
             isFollowing={isFollowing}
+            isFollowingSent={isFollowingSent}
           />
         </div>
       )}
-      <FriendRequests />
     </div>
   );
 };

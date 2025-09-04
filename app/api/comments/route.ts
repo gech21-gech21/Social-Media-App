@@ -1,16 +1,15 @@
-// app/api/comments/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
-import prisma from "../../../lib/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
+import prisma from '../../../lib/client';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const postId = searchParams.get("postId");
+    const postId = searchParams.get('postId');
 
     if (!postId) {
       return NextResponse.json(
-        { error: "Post ID is required" },
+        { error: 'Post ID is required' },
         { status: 400 }
       );
     }
@@ -21,18 +20,17 @@ export async function GET(request: NextRequest) {
       },
       include: {
         user: true,
-        likes: true, // ADD THIS LINE TO INCLUDE LIKES
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
 
     return NextResponse.json(comments);
   } catch (error) {
-    console.error("Error fetching comments:", error);
+    console.error('Error fetching comments:', error);
     return NextResponse.json(
-      { error: "Failed to fetch comments" },
+      { error: 'Failed to fetch comments' },
       { status: 500 }
     );
   }
@@ -41,16 +39,19 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = getAuth(request);
-
+    
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     const { desc, postId } = await request.json();
 
     if (!desc || !postId) {
       return NextResponse.json(
-        { error: "Description and post ID are required" },
+        { error: 'Description and post ID are required' },
         { status: 400 }
       );
     }
@@ -63,15 +64,14 @@ export async function POST(request: NextRequest) {
       },
       include: {
         user: true,
-        likes: true, // ADD THIS LINE TO INCLUDE LIKES
       },
     });
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {
-    console.error("Error creating comment:", error);
+    console.error('Error creating comment:', error);
     return NextResponse.json(
-      { error: "Failed to create comment" },
+      { error: 'Failed to create comment' },
       { status: 500 }
     );
   }

@@ -10,8 +10,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ data: "Protected content" });
+
   } catch {
     console.error("Authentication error:", Error);
+
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 401 }

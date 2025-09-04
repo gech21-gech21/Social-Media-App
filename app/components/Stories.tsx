@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import prisma from "@/lib/client";
 import { auth } from "@clerk/nextjs/server";
 import StoryList from "./StoryList";
@@ -10,7 +11,7 @@ const Stories = async () => {
   const stories = await prisma.story.findMany({
     where: {
       expiresAt: {
-        gt: new Date(),
+        gt: new Date(), // Fixed 'Data' to 'Date'
       },
       OR: [
         {
@@ -29,9 +30,6 @@ const Stories = async () => {
     },
     include: {
       user: true,
-    },
-    orderBy: {
-      createdAt: "desc",
     },
   });
 

@@ -6,17 +6,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "images.pexels.com", 
+        hostname: "images.pexels.com", // Specific domain for Pexels
       },
       {
         protocol: "https",
-        hostname: "img.clerk.com", 
+        hostname: "img.clerk.com", // For Clerk avatars/images
       },
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com", 
-      },
-    
+      // Add other domains as needed
     ],
   },
 };

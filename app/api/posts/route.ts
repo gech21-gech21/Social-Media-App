@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/client";
 
-// Define TypeScript interfaces for the response data
+// Define User, Like, and Post interfaces based on your schema
 interface User {
   id: string;
   username: string;
   name: string | null;
   surname: string | null;
   avatar: string | null;
-  // Add other user fields as needed
 }
 
 interface Like {
@@ -17,9 +16,11 @@ interface Like {
 }
 
 interface Post {
-  id: string;
-  content: string;
+  id: number; // Changed to number based on your schema
+  content: string; // Ensure this matches your Post model
+  img?: string; // Optional image field
   createdAt: Date;
+  updatedAt: Date;
   userId: string;
   user: User;
   likes: Like[];
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     if (username) {
       // Get posts for a specific user
-      posts = (await prisma.post.findMany({
+      posts = await prisma.post.findMany({
         where: {
           user: {
             username: username,
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
         orderBy: {
           createdAt: "desc",
         },
-      })) as Post[];
+      });
     } else if (userId) {
       // Get posts from users that the current user follows
       const following = await prisma.follower.findMany({
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
       const followingIds = following.map((f) => f.followingId);
       const ids = [userId, ...followingIds]; // Include user's own posts
 
-      posts = (await prisma.post.findMany({
+      posts = await prisma.post.findMany({
         where: {
           userId: {
             in: ids,
@@ -97,10 +98,23 @@ export async function GET(request: NextRequest) {
         orderBy: {
           createdAt: "desc",
         },
-      })) as Post[];
+      });
     }
 
-    return NextResponse.json(posts, { status: 200 });
+    // Format posts to ensure they match the Post type
+    const formattedPosts: Post[] = posts.map(post => ({
+      id: post.id,
+      content: post.content, // Ensure this field exists
+      img: post.img,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      userId: post.userId,
+      user: post.user,
+      likes: post.likes,
+      _count: post._count,
+    }));
+
+    return NextResponse.json(formattedPosts, { status: 200 });
   } catch (error) {
     console.error("Error fetching posts:", error);
     return NextResponse.json(
@@ -110,7 +124,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Optional: Add POST method for creating new posts
+// POST method for creating a new post
 export async function POST(request: NextRequest) {
   try {
     const { userId } = getAuth(request);
@@ -119,7 +133,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { content } = await request.json();
+    const { content, img } = await request.json();
 
     if (!content) {
       return NextResponse.json(
@@ -130,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     const newPost = await prisma.post.create({
       data: {
-        content,
+        img,
         userId,
       },
       include: {

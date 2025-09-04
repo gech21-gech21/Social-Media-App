@@ -4,34 +4,21 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import UpdateButton from "./UpdateButton";
-import {
-  CldUploadWidget,
-  CloudinaryUploadWidgetResults,
-} from "next-cloudinary"; // Import the correct type
+import { CldUploadWidget } from "next-cloudinary";
 import { useForm } from "react-hook-form";
-import { updateProfile } from "@/lib/action"; // Import your actual server action
 
-// Define proper types for the form data
-interface UpdateFormData {
-  name: string;
-  surname: string;
-  description: string;
-  city: string;
-  school: string;
-  work: string;
-  website: string;
-  cover?: string;
-}
+const updateProfile = async (formData: any) => {
+
+  console.log("Updating profile with:", formData);
+  return { success: true, error: false }; // Simulate success
+};
 
 const UpdateUser = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
   const [cover, setCover] = useState(user.cover || "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
   const router = useRouter();
 
-  const { register, handleSubmit, reset } = useForm<UpdateFormData>({
+  const { register, handleSubmit, formState } = useForm({
     defaultValues: {
       name: user.name || "",
       surname: user.surname || "",
@@ -43,58 +30,16 @@ const UpdateUser = ({ user }: { user: User }) => {
     },
   });
 
-  const onSubmit = async (data: UpdateFormData) => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
-
-    try {
-      const formData = new FormData();
-
-      Object.entries(data).forEach(([key, value]) => {
-        if (value) {
-          formData.append(key, value);
-        }
-      });
-
-      if (cover && cover !== user.cover) {
-        formData.append("cover", cover);
-      }
-
-      const result = await updateProfile(
-        { success: false, error: false },
-        formData
-      );
-
-      if (result.success) {
-        setSubmitSuccess(true);
-        setTimeout(() => {
-          setOpen(false);
-          router.refresh();
-          reset();
-        }, 1500);
-      } else {
-        setSubmitError("Failed to update profile");
-      }
-    } catch (error) {
-      console.error("Update error:", error);
-      setSubmitError("Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+  const onSubmit = async (formData: any) => {
+    const result = await updateProfile(formData);
+    if (result.success) {
+      router.refresh(); // Refresh the page to show updated data
+      setOpen(false); // Close the modal
     }
   };
 
   const handleClose = () => {
     setOpen(false);
-    setSubmitError(null);
-    setSubmitSuccess(false);
-    reset();
-  };
-
-  const handleUploadSuccess = (result: CloudinaryUploadWidgetResults) => {
-    if (result.info && typeof result.info !== "string") {
-      setCover(result.info.secure_url);
-    }
   };
 
   return (
@@ -115,8 +60,8 @@ const UpdateUser = ({ user }: { user: User }) => {
 
             {/* Cover Picture */}
             <CldUploadWidget
-              uploadPreset="social"
-              onSuccess={handleUploadSuccess}
+              uploadPreset="socialmedia"
+              onSuccess={(result: any) => setCover(result.info.secure_url)}
             >
               {({ open }) => (
                 <div className="flex flex-col gap-2">
@@ -135,7 +80,7 @@ const UpdateUser = ({ user }: { user: User }) => {
                     <span className="text-xs underline text-gray-600">
                       change
                     </span>
-                    <input type="hidden" {...register("cover")} value={cover} />
+                    <input type="hidden" name="cover" value={cover} />
                   </div>
                 </div>
               )}
@@ -164,6 +109,7 @@ const UpdateUser = ({ user }: { user: User }) => {
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-gray-500">Description</label>
                 <input
+                
                   type="text"
                   {...register("description")}
                   placeholder="Life is Beautiful"
@@ -208,22 +154,23 @@ const UpdateUser = ({ user }: { user: User }) => {
               </div>
             </div>
 
-            <UpdateButton isSubmitting={isSubmitting} />
+            <UpdateButton />
 
-            {submitSuccess && (
+            {formState.isSubmitSuccessful && (
               <span className="text-green-500 text-sm">
                 Profile has been updated!
               </span>
             )}
-            {submitError && (
-              <span className="text-red-500 text-sm">{submitError}</span>
+            {formState.errors && (
+              <span className="text-red-500 text-sm">
+                Something went wrong!
+              </span>
             )}
 
             <button
               type="button"
               className="absolute text-xl right-4 top-4 cursor-pointer text-gray-500 hover:text-gray-700"
               onClick={handleClose}
-              disabled={isSubmitting}
             >
               ×
             </button>

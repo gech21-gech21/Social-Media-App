@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import FriendRequestList from "./FriendRequestList";
 import { User, FollowRequest } from "@prisma/client";
 
-
+// Define the type for requests with sender
 type RequestWithUser = FollowRequest & {
   sender: User;
 };
@@ -15,7 +15,8 @@ const FriendRequests = async () => {
   
   if (!userId) return null;
 
- 
+  // Note: Prisma model names are case-sensitive
+  // Make sure your model is named FollowRequest (singular)
   const requests = await prisma.followRequest.findMany({
     where: {
       receiverId: userId,
@@ -35,7 +36,6 @@ const FriendRequests = async () => {
           see all
         </Link>
       </div>
-      
       
       <FriendRequestList requests={requests} />
     </div>
