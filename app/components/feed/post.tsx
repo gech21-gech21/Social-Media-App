@@ -11,7 +11,7 @@ import CommentWrapper from "../feed/CommentWrapper";
 
 type FeedType = PostType & {
   user: User;
-  img:string;
+  img: string;
   likes: Array<{ userId: string }>;
   _count: {
     comments: number;

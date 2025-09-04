@@ -1,32 +1,52 @@
+"use client";
+
 import Link from "next/link";
-import React from "react";
-import prisma from "@/lib/client";
-import { auth } from "@clerk/nextjs/server";
+import React, { useEffect, useState } from "react";
 import FriendRequestList from "./FriendRequestList";
 import { User, FollowRequest } from "@prisma/client";
 
-// Define the type for requests with sender
 type RequestWithUser = FollowRequest & {
   sender: User;
 };
 
-const FriendRequests = async () => {
-  const { userId } = await auth();
-  
-  if (!userId) return null;
+const FriendRequests: React.FC = () => {
+  const [requests, setRequests] = useState<RequestWithUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Note: Prisma model names are case-sensitive
-  // Make sure your model is named FollowRequest (singular)
-  const requests = await prisma.followRequest.findMany({
-    where: {
-      receiverId: userId,
-    },
-    include: {
-      sender: true
-    }
-  });
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const response = await fetch("/api/friend-requests");
 
-  if (requests.length === 0) return null;
+        if (!response.ok) {
+          throw new Error("Failed to fetch friend requests");
+        }
+
+        const requestsData = await response.json();
+        setRequests(requestsData);
+      } catch (err) {
+        console.error("Failed to fetch requests:", err);
+        setError("Failed to load friend requests.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
+
+  if (loading) {
+    return <div>Loading friend requests...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
+  if (requests.length === 0) {
+    return <div>No friend requests.</div>;
+  }
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-lg w-full text-sm flex flex-col gap-4">
@@ -36,7 +56,6 @@ const FriendRequests = async () => {
           see all
         </Link>
       </div>
-      
       <FriendRequestList requests={requests} />
     </div>
   );

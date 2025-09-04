@@ -9,11 +9,9 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Your protected logic here
     return NextResponse.json({ data: "Protected content" });
-
-  } catch {
-    console.error("Authentication error:", Error);
-
+  } catch (error) {
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 401 }

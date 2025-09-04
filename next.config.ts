@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "img.clerk.com", // For Clerk avatars/images
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com", // Add Cloudinary domain
+      },
       // Add other domains as needed
     ],
   },

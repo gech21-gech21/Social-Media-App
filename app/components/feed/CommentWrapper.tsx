@@ -1,4 +1,4 @@
-
+// components/feed/CommentWrapper.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,10 +7,10 @@ import { Comment, User, Like } from "@prisma/client";
 
 export type CommentWithUser = Comment & {
   user: User;
-  likes?: Like[];
+  likes: Like[];
 };
 
-const CommentWrapper = ({ postId }: { postId: string }) => {
+const CommentWrapper = ({ postId }: { postId: string | number }) => {
   const [comments, setComments] = useState<CommentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,19 +20,19 @@ const CommentWrapper = ({ postId }: { postId: string }) => {
       try {
         setLoading(true);
         const response = await fetch(`/api/comments?postId=${postId}`);
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch comments: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Ensure all comments have a likes array
         const commentsWithLikes = data.map((comment: CommentWithUser) => ({
           ...comment,
-          likes: comment.likes || []
+          likes: comment.likes || [],
         }));
-        
+
         setComments(commentsWithLikes);
         setError(null);
       } catch (err) {
@@ -58,7 +58,7 @@ const CommentWrapper = ({ postId }: { postId: string }) => {
     return (
       <div className="mt-4 p-4 bg-red-50 rounded-lg">
         <div className="text-red-500 text-center">Error: {error}</div>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
         >
@@ -70,7 +70,7 @@ const CommentWrapper = ({ postId }: { postId: string }) => {
 
   return (
     <div className="mt-4">
-      <CommentList postId={postId} />
+      <CommentList initialComments={comments} postId={postId.toString()} />
     </div>
   );
 };
