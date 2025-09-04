@@ -1,9 +1,9 @@
 // components/rightmenu/usermediacard.tsx
 import Link from "next/link";
 import React from "react";
-import { User, Post } from "@prisma/client";
+import { User } from "@prisma/client"; // Removed unused Post import
 import prisma from "@/lib/client";
-import ClientImage from "@/app/components/ClientImage"; // Import the new component
+import ClientImage from "@/app/components/ClientImage";
 
 const UserMediaCard = async ({ user }: { user: User | null | undefined }) => {
   // Check if user is undefined or null
@@ -29,7 +29,9 @@ const UserMediaCard = async ({ user }: { user: User | null | undefined }) => {
     });
 
     // Filter posts that have images (client-side filtering)
-    const postMedia = allPosts.filter(post => post.img && post.img.trim() !== "").slice(0, 8);
+    const postMedia = allPosts
+      .filter((post) => post.img && post.img.trim() !== "")
+      .slice(0, 8);
 
     return (
       <div className="shadow-lg rounded-2xl p-4 bg-white">

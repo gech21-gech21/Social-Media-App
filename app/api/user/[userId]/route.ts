@@ -5,7 +5,7 @@ import prisma from "@/lib/client";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } } // Correct way to type params
 ) {
   try {
     const { userId: currentUserId } = getAuth(request);
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = params.userId;
+    const userId = params.userId; // Access params directly
 
     const user = await prisma.user.findUnique({
       where: { id: userId },

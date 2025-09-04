@@ -1,7 +1,6 @@
 // components/rightmenu/updateuser.tsx
 "use client";
 
-import { User } from "@prisma/client";
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,7 +11,7 @@ import {
 } from "next-cloudinary";
 import { updateProfile } from "@/lib/action";
 
-// Create a compatible user type
+// Create a compatible user type with optional updatedAt
 interface CompatibleUser {
   id: string;
   name: string | null;
@@ -29,7 +28,7 @@ interface CompatibleUser {
   avatar: string | null;
   country: string | null;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date; // Made optional
 }
 
 const UpdateUser = ({ user }: { user: CompatibleUser }) => {

@@ -155,7 +155,7 @@ export const updateProfile = async (
     // Filter out empty strings
     const filteredData = Object.fromEntries(
       Object.entries(rawData).filter(
-        ([_, value]) => value !== undefined && value !== ""
+        ([, value]) => value !== undefined && value !== ""
       )
     );
 

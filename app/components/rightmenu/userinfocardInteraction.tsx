@@ -1,16 +1,14 @@
 "use client";
 import React, { useOptimistic, useState, useTransition } from "react";
-import { switchFollow, switchBlock } from "@/lib/action"; // Import your actions
+import { switchFollow, switchBlock } from "@/lib/action";
 
 const UserinfocardInteraction = ({
   userId,
-  currentUserId,
   isUserBlocked,
   isFollowing,
   isFollowingSent,
 }: {
   userId: string;
-  currentUserId: string;
   isUserBlocked: boolean;
   isFollowing: boolean;
   isFollowingSent: boolean;
@@ -52,7 +50,6 @@ const UserinfocardInteraction = ({
         }));
       } catch (error) {
         console.error("Follow error:", error);
-        // Revert optimistic update on error
         switchOptimisticState("follow");
       }
     });
@@ -70,7 +67,6 @@ const UserinfocardInteraction = ({
         }));
       } catch (error) {
         console.error("Block error:", error);
-        // Revert optimistic update on error
         switchOptimisticState("block");
       }
     });

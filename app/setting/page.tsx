@@ -1,5 +1,3 @@
-import React from "react";
-import Link from "next/link";
 import Rightmenu from "../components/rightmenu/Rightmenu";
 import Updateuser from "../components/rightmenu/updateuser";
 import Profilecard from "../components/leftMenu/ProfileCard";
@@ -26,7 +24,7 @@ const page = async () => {
       <div>
         <Profilecard />
         <Updateuser user={user} />
-        <Rightmenu />
+        <Rightmenu user={user} /> {/* Pass user to Rightmenu if it needs it */}
       </div>
     </div>
   );
