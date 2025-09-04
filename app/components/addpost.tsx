@@ -11,12 +11,10 @@ import {
 import AddpostButton from "../components/AddpostButton";
 import { addPost } from "@/lib/action";
 
-// Define proper types for Cloudinary response
 interface CloudinaryInfoWithSecureUrl extends CloudinaryUploadWidgetInfo {
   secure_url: string;
 }
 
-// Type guard function without 'any'
 function isCloudinaryInfoWithSecureUrl(
   info: unknown
 ): info is CloudinaryInfoWithSecureUrl {
@@ -28,7 +26,6 @@ function isCloudinaryInfoWithSecureUrl(
   );
 }
 
-// Define type for the widget parameter
 interface CloudinaryWidget {
   close: () => void;
 }

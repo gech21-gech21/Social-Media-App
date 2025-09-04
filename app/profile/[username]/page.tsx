@@ -52,7 +52,7 @@ const ProfilePage = async (props: PageProps) => {
       isBlocked = !!blockRelation;
     }
 
-    if (isBlocked) return notFound();
+    if (isBlocked) return ;
 
     return (
       <div className="">
