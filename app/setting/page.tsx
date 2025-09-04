@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "next/link";
+
 import Rightmenu from "../components/rightmenu/Rightmenu";
 import Updateuser from "../components/rightmenu/updateuser";
 import Profilecard from "../components/leftMenu/ProfileCard";

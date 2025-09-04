@@ -73,7 +73,7 @@ const Feed = ({ username }: { username?: string }) => {
           posts.map((post) => <Post key={post.id} post={post} />)
         ) : (
           <div className="text-center py-8 text-gray-500">
-            {username ? `${username} hasn't posted anything yet` : "No posts found. Follow more users to see content in your feed."}
+            {username ? `${username} hasn't posted anything yet` : "No posts found. Follow more users to see more content."}
           </div>
         )}
       </div>
