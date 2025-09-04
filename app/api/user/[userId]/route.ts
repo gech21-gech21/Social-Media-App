@@ -1,27 +1,27 @@
+// app/api/user/[userId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/client";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } } // Correctly typed params
+  { params }: { params: Promise<{ userId: string }> } // Add Promise wrapper
 ) {
   try {
     const { userId: currentUserId } = getAuth(request);
 
-    // Check if the user is authenticated
     if (!currentUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = params.userId; // Access params directly
+    // Await the params to resolve the Promise
+    const resolvedParams = await params;
+    const userId = resolvedParams.userId;
 
-    // Fetch user data from the database
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
 
-    // Handle case where user is not found
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -50,7 +50,6 @@ export async function GET(
       },
     });
 
-    // Return the user data and status information
     return NextResponse.json({
       user,
       currentUserId,

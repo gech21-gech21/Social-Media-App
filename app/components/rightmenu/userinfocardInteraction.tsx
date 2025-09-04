@@ -1,6 +1,7 @@
 "use client";
 import React, { useOptimistic, useState, useTransition } from "react";
 import { switchFollow, switchBlock } from "@/lib/action";
+import { useAuth } from "@clerk/nextjs";
 
 const UserinfocardInteraction = ({
   userId,
@@ -13,6 +14,7 @@ const UserinfocardInteraction = ({
   isFollowing: boolean;
   isFollowingSent: boolean;
 }) => {
+  const { userId: currentUserId } = useAuth();
   const [userstate, setUserstate] = useState({
     following: isFollowing,
     blocked: isUserBlocked,

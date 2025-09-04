@@ -1,4 +1,3 @@
-// components/rightmenu/userinfocard.tsx
 "use client";
 
 import Link from "next/link";
@@ -173,7 +172,6 @@ const UserInfoCard: React.FC<{ userId: string }> = ({ userId }) => {
         <div className="mt-4">
           <UserinfocardInteraction
             userId={user.id}
-            currentUserId={currentUserId}
             isUserBlocked={isUserBlocked}
             isFollowing={isFollowing}
             isFollowingSent={isFollowingSent}

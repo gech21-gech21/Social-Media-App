@@ -1,84 +1,57 @@
-// components/rightmenu/usermediacard.tsx
-import Link from "next/link";
+"use client";
+
 import React from "react";
-import { User } from "@prisma/client"; // Removed unused Post import
-import prisma from "@/lib/client";
-import ClientImage from "@/app/components/ClientImage";
+import { User } from "@prisma/client";
 
-const UserMediaCard = async ({ user }: { user: User | null | undefined }) => {
-  // Check if user is undefined or null
-  if (!user || !user.id) {
-    return (
-      <div className="shadow-lg rounded-2xl p-4 bg-white">
-        <div className="flex justify-between items-center font-medium mb-4">
-          <span className="text-gray-500">User Media</span>
-        </div>
-        <div className="text-center text-gray-500 py-4">User not available</div>
+interface UserMediaCardProps {
+  user: User;
+}
+
+const UserMediaCard: React.FC<UserMediaCardProps> = ({ user }) => {
+  // This component now accepts a 'user' prop of type User
+  return (
+    <div className="bg-white shadow-lg rounded-lg p-4 mt-4">
+      <div className="flex justify-between items-center font-medium mb-4">
+        <span className="text-gray-500">User Media</span>
+        <button className="text-blue-500 text-sm">See all</button>
       </div>
-    );
-  }
 
-  try {
-    // Fetch posts with images - Use a different approach
-    const allPosts = await prisma.post.findMany({
-      where: {
-        userId: user.id,
-      },
-      take: 12, // Get more posts to filter
-      orderBy: { createdAt: "desc" },
-    });
-
-    // Filter posts that have images (client-side filtering)
-    const postMedia = allPosts
-      .filter((post) => post.img && post.img.trim() !== "")
-      .slice(0, 8);
-
-    return (
-      <div className="shadow-lg rounded-2xl p-4 bg-white">
-        <div className="flex justify-between items-center font-medium mb-4">
-          <span className="text-gray-500">User Media</span>
-          <Link
-            className="text-blue-500 text-sm"
-            href={`/user/${user.username}/media`}
-          >
-            See all
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2">
-          {postMedia.length > 0 ? (
-            postMedia.map((post) => (
-              <div className="relative aspect-square" key={post.id}>
-                <ClientImage
-                  alt={`Media post by ${user.name || user.username}`}
-                  src={post.img || "/icons/noimage.png"}
-                  fill
-                  className="object-cover rounded-md"
-                  sizes="(max-width: 768px) 20vw, 10vw"
-                />
-              </div>
-            ))
-          ) : (
-            <div className="col-span-4 text-center text-gray-500 py-4">
-              No media found
-            </div>
-          )}
+      <div className="flex items-center gap-4 mb-4">
+        {user.avatar && (
+          <img
+            src={user.avatar}
+            alt="User avatar"
+            className="w-12 h-12 rounded-full object-cover"
+          />
+        )}
+        <div>
+          <p className="font-medium text-sm">
+            {user.name && user.surname
+              ? `${user.name} ${user.surname}`
+              : user.username}
+          </p>
+          <p className="text-xs text-gray-500">@{user.username}</p>
         </div>
       </div>
-    );
-  } catch (error) {
-    console.error("Error fetching user media:", error);
-    return (
-      <div className="shadow-lg rounded-2xl p-4 bg-white">
-        <div className="flex justify-between items-center font-medium mb-4">
-          <span className="text-gray-500">User Media</span>
-        </div>
-        <div className="text-center text-gray-500 py-4">
-          Error loading media
-        </div>
+
+      {/* Placeholder for user media content */}
+      <div className="grid grid-cols-3 gap-2">
+        {/* Example media items - replace with actual user media */}
+        <div className="aspect-square bg-gray-200 rounded"></div>
+        <div className="aspect-square bg-gray-200 rounded"></div>
+        <div className="aspect-square bg-gray-200 rounded"></div>
+        <div className="aspect-square bg-gray-200 rounded"></div>
+        <div className="aspect-square bg-gray-200 rounded"></div>
+        <div className="aspect-square bg-gray-200 rounded"></div>
       </div>
-    );
-  }
+
+      <div className="mt-4 text-center">
+        <button className="text-blue-500 text-sm hover:underline">
+          View all media
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default UserMediaCard;

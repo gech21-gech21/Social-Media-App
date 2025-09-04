@@ -16,9 +16,9 @@ interface Like {
 }
 
 interface Post {
-  id: number; // Changed to number based on your schema
-  content: string; // Ensure this matches your Post model
-  img?: string; // Optional image field
+  id: number;
+  desc: string; // Changed from 'content' to 'desc' to match your Prisma schema
+  img?: string;
   createdAt: Date;
   updatedAt: Date;
   userId: string;
@@ -26,6 +26,7 @@ interface Post {
   likes: Like[];
   _count: {
     comments: number;
+    likes: number; // Added likes count based on your usage
   };
 }
 
@@ -46,7 +47,15 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              surname: true,
+              avatar: true,
+            },
+          },
           likes: {
             select: {
               userId: true,
@@ -55,6 +64,7 @@ export async function GET(request: NextRequest) {
           _count: {
             select: {
               comments: true,
+              likes: true, // Added likes count
             },
           },
         },
@@ -83,7 +93,15 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              surname: true,
+              avatar: true,
+            },
+          },
           likes: {
             select: {
               userId: true,
@@ -92,6 +110,7 @@ export async function GET(request: NextRequest) {
           _count: {
             select: {
               comments: true,
+              likes: true, // Added likes count
             },
           },
         },
@@ -102,16 +121,19 @@ export async function GET(request: NextRequest) {
     }
 
     // Format posts to ensure they match the Post type
-    const formattedPosts: Post[] = posts.map(post => ({
+    const formattedPosts: Post[] = posts.map((post) => ({
       id: post.id,
-      content: post.content, // Ensure this field exists
-      img: post.img,
+      desc: post.desc, // Use 'desc' instead of 'content'
+      img: post.img || undefined,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       userId: post.userId,
       user: post.user,
       likes: post.likes,
-      _count: post._count,
+      _count: {
+        comments: post._count.comments,
+        likes: post._count.likes || 0, // Ensure likes count exists
+      },
     }));
 
     return NextResponse.json(formattedPosts, { status: 200 });
@@ -133,22 +155,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { content, img } = await request.json();
+    const { desc, img } = await request.json(); // Changed from 'content' to 'desc'
 
-    if (!content) {
+    if (!desc) {
       return NextResponse.json(
-        { error: "Content is required" },
+        { error: "Description is required" }, // Updated error message
         { status: 400 }
       );
     }
 
     const newPost = await prisma.post.create({
       data: {
-        img,
+        desc, // Use 'desc' instead of 'content'
+        img: img || null,
         userId,
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            surname: true,
+            avatar: true,
+          },
+        },
         likes: {
           select: {
             userId: true,
@@ -157,6 +188,7 @@ export async function POST(request: NextRequest) {
         _count: {
           select: {
             comments: true,
+            likes: true,
           },
         },
       },

@@ -10,7 +10,7 @@ const PostInteraction = ({
   likes: string[];
   commentNumber: number;
 }) => {
-  const { userId } = useAuth(); // Removed isLoaded since not used
+  const { userId } = useAuth();
   const [likeState, setLikeState] = useState({
     likeCount: likes.length,
     isLiked: userId ? likes.includes(userId) : false,
@@ -78,7 +78,7 @@ const PostInteraction = ({
             </span>
           </div>
         </div>
-        {/* Share - Consider making this functional or removing */}
+        {/* Share */}
         <div className="flex items-center gap-2 md:gap-4 bg-slate-100 p-2 rounded-xl cursor-pointer">
           <Image
             src="/icons/share.png"
@@ -86,9 +86,7 @@ const PostInteraction = ({
             height={20}
             alt="share image"
           />
-          <span className="text-gray-500">
-            Share {/* Removed hardcoded number */}
-          </span>
+          <span className="text-gray-500">Share</span>
         </div>
       </div>
     </div>
