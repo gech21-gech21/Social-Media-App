@@ -7,7 +7,7 @@ const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLinkClick = () => {
-    setIsOpen(false); // Close the menu when a link is clicked
+    setIsOpen(false); 
   };
 
   return (
