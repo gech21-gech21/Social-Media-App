@@ -5,7 +5,7 @@ import Post from "../feed/post";
 import { useUser } from "@clerk/nextjs";
 import { PostType } from "@/lib/type"; 
 
-// Define the extended type that matches what Post component expects
+
 type FeedPostType = PostType & {
   user: {
     id: string;

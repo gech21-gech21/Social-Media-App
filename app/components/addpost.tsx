@@ -32,7 +32,6 @@ interface CloudinaryWidget {
 
 const AddPost = () => {
   const { isLoaded, user } = useUser();
-  const [desc, setDesc] = useState("");
   const [img, setImg] = useState<{ secure_url?: string } | null>(null);
 
   if (!isLoaded) {
@@ -71,7 +70,6 @@ const AddPost = () => {
             required
             className="bg-gray-100 w-full rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
             rows={3}
-            onChange={(e) => setDesc(e.target.value)}
           ></textarea>
           <AddpostButton />
         </form>

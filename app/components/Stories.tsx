@@ -3,32 +3,6 @@ import prisma from "@/lib/client";
 import { auth } from "@clerk/nextjs/server";
 import StoryList from "./StoryList";
 
-// Type that matches your exact Prisma schema
-type StoryWithUser = {
-  id: number;
-  img: string;
-  createdAt: Date;
-  expiresAt: Date;
-  userId: string;
-  user: {
-    id: string;
-    email: string;
-    password: string;
-    username: string;
-    name: string | null;
-    surname: string | null;
-    avatar: string | null;
-    description: string | null;
-    work: string | null;
-    school: string | null;
-    website: string | null;
-    city: string | null;
-    country: string | null;
-    cover: string | null;
-    createdAt: Date;
-  };
-};
-
 const Stories = async () => {
   const { userId: currentUserId } = await auth();
   if (!currentUserId) return null;

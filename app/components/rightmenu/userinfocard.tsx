@@ -30,6 +30,7 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
   const { userId: currentUserId } = await auth();
   let isUserBlocked = false;
   let isFollowing = false;
+  let isFollowingSent = false;
 
   if (currentUserId) {
     isUserBlocked = !!(await prisma.block.findFirst({
@@ -43,6 +44,13 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
       where: {
         followerId: currentUserId,
         followingId: user.id,
+      },
+    }));
+
+    isFollowingSent = !!(await prisma.followRequest.findFirst({
+      where: {
+        senderId: currentUserId,
+        receiverId: user.id,
       },
     }));
   }

@@ -11,7 +11,6 @@ export type CommentWithUser = Comment & {
 };
 
 const CommentWrapper = ({ postId }: { postId: string }) => {
-  const [comments, setComments] = useState<CommentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +32,6 @@ const CommentWrapper = ({ postId }: { postId: string }) => {
           likes: comment.likes || []
         }));
         
-        setComments(commentsWithLikes);
         setError(null);
       } catch (err) {
         console.error("Failed to fetch comments:", err);

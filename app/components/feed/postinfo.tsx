@@ -26,21 +26,6 @@ const PostInfo = ({ postId }: { postId: number }) => {
     }
   };
 
-  const handleView = async () => {
-    setLoading(true);
-    try {
-      const post = await getPost(postId);
-      // Navigate to post detail page or show modal
-      router.push(`/post/${postId}`);
-    } catch (error) {
-      console.error("Error viewing post:", error);
-      alert("Failed to load post");
-    } finally {
-      setLoading(false);
-      setOpen(false);
-    }
-  };
-
   const handleEdit = async () => {
     setLoading(true);
     try {
@@ -94,15 +79,6 @@ const PostInfo = ({ postId }: { postId: number }) => {
 
       {open && !isEditing && (
         <div className="absolute top-4 right-0 bg-white p-4 rounded-lg flex flex-col w-32 gap-2 text-xs shadow-lg z-30">
-          <button
-            type="button"
-            className="text-left cursor-pointer hover:text-blue-600"
-            onClick={handleView}
-            disabled={loading}
-          >
-            {loading ? "Loading..." : "View"}
-          </button>
-
           <button
             type="button"
             className="text-left cursor-pointer hover:text-green-600"

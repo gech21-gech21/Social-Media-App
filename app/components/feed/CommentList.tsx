@@ -1,6 +1,6 @@
 "use client";
 
-import { addComment, switchCommentLike } from "@/lib/action";
+import { addComment, switchCommentLike } from "@/lib/action"; // Adjust the path as necessary
 import { useUser } from "@clerk/nextjs";
 import { Comment, User, Like } from "@prisma/client";
 import Image from "next/image";
@@ -11,7 +11,7 @@ type CommentWithUser = Comment & {
   likes: Like[];
 };
 
-const CommentList = ({ postId }: { postId: string }) => {
+const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
   const { user } = useUser();
   const [comments, setComments] = useState<CommentWithUser[]>([]);
   const [desc, setDesc] = useState("");
@@ -31,7 +31,7 @@ const CommentList = ({ postId }: { postId: string }) => {
           throw new Error(`Failed to fetch comments: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data: CommentWithUser[] = await response.json();
         setComments(data);
         setError(null);
       } catch (err) {
