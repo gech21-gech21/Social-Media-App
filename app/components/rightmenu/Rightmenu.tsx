@@ -17,7 +17,6 @@ const Rightmenu = ({ user }: { user?: User }) => {
           </Suspense>
           <Suspense fallback="loading...">
             <UserMediaCard user={user} />{" "}
-            {/* Fixed: pass user object, not userId */}
           </Suspense>
         </>
       ) : null}

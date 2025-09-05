@@ -7,12 +7,11 @@ const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLinkClick = () => {
-    setIsOpen(false); 
+    setIsOpen(false);
   };
 
   return (
     <div className="md:hidden">
-      {/* Burger Icon */}
       <div
         className="flex flex-col gap-[4.5px] cursor-pointer"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -34,13 +33,12 @@ const MobileMenu = () => {
         />
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div className="absolute left-0 top-24 w-full h-[calc(100vh-96px)] bg-white flex flex-col items-center justify-center gap-8 font-medium text-xl z-10">
           <Link href="/" onClick={handleLinkClick}>
             Home
           </Link>
-          <Link href="/friends" onClick={handleLinkClick}>
+          <Link href="/feriend" onClick={handleLinkClick}>
             Friends
           </Link>
           <Link href="/groups" onClick={handleLinkClick}>
@@ -49,8 +47,8 @@ const MobileMenu = () => {
           <Link href="/stories" onClick={handleLinkClick}>
             Stories
           </Link>
-          <Link href="/login" onClick={handleLinkClick}>
-            Login
+          <Link href="/setting" onClick={handleLinkClick}>
+            setting
           </Link>
         </div>
       )}

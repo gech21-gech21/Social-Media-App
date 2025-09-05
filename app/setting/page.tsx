@@ -1,6 +1,7 @@
 import Rightmenu from "../components/rightmenu/Rightmenu";
-import Updateuser from "../components/rightmenu/updateuser";
 import Profilecard from "../components/leftMenu/ProfileCard";
+import UserInfoCard from "../components/rightmenu/userinfocard";
+import UserMediaCard from "../components/rightmenu/usermediacard";
 import prisma from "@/lib/client";
 import { auth } from "@clerk/nextjs/server";
 
@@ -8,7 +9,7 @@ const page = async () => {
   const { userId } = await auth();
 
   if (!userId) {
-    return <div>No user ID found.</div>;
+    return <div>No user found.</div>;
   }
 
   const user = await prisma.user.findUnique({
@@ -23,8 +24,10 @@ const page = async () => {
     <div>
       <div>
         <Profilecard />
-        <Updateuser user={user} />
-        <Rightmenu user={user} /> {/* Pass user to Rightmenu if it needs it */}
+
+        <Rightmenu user={user} />
+        <UserInfoCard userId={user.id} />
+        <UserMediaCard user={user} />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import MobileMenu from "./MobileMenu";
+
 import {
   ClerkLoading,
   SignedIn,
@@ -32,7 +32,7 @@ export default function Navbar() {
             ></Image>
             <span>Home</span>
           </Link>
-          <Link className=" flex gap-2 items-center" href="/">
+          <Link className=" flex gap-2 items-center" href="/feriend">
             <Image
               alt="home page image"
               src="/icons/friends.png"
@@ -42,7 +42,7 @@ export default function Navbar() {
             ></Image>
             <span>Friends</span>
           </Link>
-          <Link className=" flex gap-2 items-center" href="../component/stories.tsx">
+          <Link className=" flex gap-2 items-center" href="/stories">
             <Image
               alt="home page image"
               src="/icons/story.png"
@@ -57,20 +57,22 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="searching..."
-              className="rounded-lg w-26 bg-gray-200 focus:outline-none pl-2 "
+              className="rounded-lg w-26 bg-gray-200 focus:outline-none pl-2"
+              id="search-input"
             />
-            <Image
-              src="/icons/searching.png"
-              alt="searching icon"
-              width={20}
-              className="bg-transparent w-4 h-4  outline-none"
-              height={20}
-            ></Image>
+            <Link href="/rightmenu/searching" className="flex items-center">
+              <Image
+                src="/icons/searching.png"
+                alt="searching icon"
+                width={20}
+                className="bg-transparent w-4 h-4 outline-none"
+                height={20}
+              />
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* rightmenu */}
       <div className="w-[30%] flex items-center gap-4 xl:gap-8 justify-end">
         <ClerkLoading>
           <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-600"></div>
@@ -102,7 +104,6 @@ export default function Navbar() {
               ></Image>
             </div>
 
-           
             <UserButton />
           </SignedIn>
 
@@ -114,7 +115,9 @@ export default function Navbar() {
                 width={20}
                 height={20}
               ></Image>
-              <Link href="/sign-in" className="text-blue-700 cursor-pointer">login/register</Link>
+              <Link href="/sign-in" className="text-blue-700 cursor-pointer">
+                login/register
+              </Link>
             </div>
           </SignedOut>
         </ClerkLoaded>
