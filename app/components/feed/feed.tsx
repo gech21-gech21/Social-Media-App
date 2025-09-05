@@ -2,11 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Post from "../feed/post";
 import { useUser } from "@clerk/nextjs";
-
 import { ApiPostType } from "../../../lib/types/index";
 
 const Feed = ({ username }: { username?: string }) => {
-  const { user: clerkUser, isLoaded } = useUser();
+  const { user: _clerkUser, isLoaded } = useUser(); // Added underscore prefix
   const [posts, setPosts] = useState<ApiPostType[]>([]);
   const [loading, setLoading] = useState(true);
 

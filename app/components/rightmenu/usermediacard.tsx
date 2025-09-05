@@ -2,13 +2,13 @@
 
 import React from "react";
 import { User } from "@prisma/client";
+import Image from "next/image";
 
 interface UserMediaCardProps {
   user: User;
 }
 
 const UserMediaCard: React.FC<UserMediaCardProps> = ({ user }) => {
-  // This component now accepts a 'user' prop of type User
   return (
     <div className="bg-white shadow-lg rounded-lg p-4 mt-4">
       <div className="flex justify-between items-center font-medium mb-4">
@@ -18,9 +18,11 @@ const UserMediaCard: React.FC<UserMediaCardProps> = ({ user }) => {
 
       <div className="flex items-center gap-4 mb-4">
         {user.avatar && (
-          <img
+          <Image
             src={user.avatar}
             alt="User avatar"
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-full object-cover"
           />
         )}

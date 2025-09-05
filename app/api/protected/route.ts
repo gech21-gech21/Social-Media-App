@@ -11,7 +11,7 @@ export async function GET() {
 
     // Your protected logic here
     return NextResponse.json({ data: "Protected content" });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Authentication failed" },
       { status: 401 }

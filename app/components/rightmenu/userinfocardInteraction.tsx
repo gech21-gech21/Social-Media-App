@@ -14,7 +14,7 @@ const UserinfocardInteraction = ({
   isFollowing: boolean;
   isFollowingSent: boolean;
 }) => {
-  const { userId: currentUserId } = useAuth();
+  const { userId: _currentUserId } = useAuth(); // Added underscore prefix
   const [userstate, setUserstate] = useState({
     following: isFollowing,
     blocked: isUserBlocked,

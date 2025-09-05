@@ -29,7 +29,7 @@ const PostInfo = ({ postId }: { postId: number }) => {
   const handleView = async () => {
     setLoading(true);
     try {
-      const post = await getPost(postId);
+      await getPost(postId); // Removed unused post variable
       // Navigate to post detail page or show modal
       router.push(`/post/${postId}`);
     } catch (error) {

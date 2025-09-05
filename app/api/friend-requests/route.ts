@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server"; // Removed NextRequest import
 import { auth } from "@clerk/nextjs/server";
 import prisma from "../../../lib/client";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+  // Removed unused request parameter
   try {
     const { userId } = await auth();
 
