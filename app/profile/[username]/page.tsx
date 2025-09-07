@@ -1,12 +1,13 @@
+// app/user/[username]/page.tsx
 import Feed from "@/app/components/feed/feed";
 import LeftMenu from "@/app/components/leftMenu/LeftMenu";
 import prisma from "../../../lib/client";
 import Rightmenu from "../../components/rightmenu/Rightmenu";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import UserInfoCard from "@/app/components/rightmenu/userinfocard";
 import UserMediaCard from "@/app/components/rightmenu/usermediacard";
+import ClientImage from "@/app/components/ClientImage"; // Import the new component
 
 // Add this type for the params
 interface PageProps {
@@ -66,14 +67,14 @@ const ProfilePage = async (props: PageProps) => {
           <div className="w-full md:w-[50%]">
             <div className="flex flex-col items-center justify-center">
               <div className="w-full h-64 mt-4 relative">
-                <Image
+                <ClientImage
                   src={user.cover || "/icons/backgroundprofile.jpg"}
                   alt="Cover image"
                   fill
                   className="rounded-md object-cover"
                   priority
                 />
-                <Image
+                <ClientImage
                   src={user.avatar || "/icons/profileimage.jpg"}
                   alt="Profile image"
                   width={120}

@@ -1,42 +1,23 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import Post from "../feed/post"; 
+import Post from "../feed/post";
 import { useUser } from "@clerk/nextjs";
-import { PostType } from "@/lib/type"; 
-
-// Define the extended type that matches what Post component expects
-type FeedPostType = PostType & {
-  user: {
-    id: string;
-    username: string;
-    name?: string;
-    surname?: string;
-    avatar?: string;
-  };
-  likes: Array<{ userId: string }>;
-  _count: {
-    comments: number;
-    likes: number;
-  };
-};
+import { ApiPostType } from "../../../lib/types/index";
 
 const Feed = ({ username }: { username?: string }) => {
-  const { user: clerkUser, isLoaded } = useUser();
-  const [posts, setPosts] = useState<FeedPostType[]>([]);
+  const { user: _clerkUser, isLoaded } = useUser(); // Added underscore prefix
+  const [posts, setPosts] = useState<ApiPostType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const url = username 
-          ? `/api/posts?username=${username}&include=user,likes,counts`
-          : '/api/posts?include=user,likes,counts';
-        
+        const url = username ? `/api/posts?username=${username}` : "/api/posts";
+
         const response = await fetch(url);
         const data = await response.json();
-        
+
         if (response.ok) {
           setPosts(data);
         } else {
@@ -68,12 +49,14 @@ const Feed = ({ username }: { username?: string }) => {
         {username && (
           <h2 className="text-xl font-bold mb-4">Posts from {username}</h2>
         )}
-        
+
         {posts.length > 0 ? (
           posts.map((post) => <Post key={post.id} post={post} />)
         ) : (
           <div className="text-center py-8 text-gray-500">
-            {username ? `${username} hasn't posted anything yet` : "No posts found. Follow more users to see content in your feed."}
+            {username
+              ? `${username} hasn't posted anything yet`
+              : "No posts found. Follow more users to see content in your feed."}
           </div>
         )}
       </div>

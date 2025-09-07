@@ -155,7 +155,7 @@ export const updateProfile = async (
     // Filter out empty strings
     const filteredData = Object.fromEntries(
       Object.entries(rawData).filter(
-        ([_, value]) => value !== undefined && value !== ""
+        ([, value]) => value !== undefined && value !== ""
       )
     );
 
@@ -210,25 +210,133 @@ export const switchLike = async (postId: number) => {
   }
 };
 
-// In your actions.ts file, update the addComment function:
-export const addComment = async (postId: string, desc: string) => {
-  // Changed to string
+export const getPost = async (postId: number) => {
   const { userId } = await auth();
   if (!userId) throw new Error("user is not authenticated");
+
   try {
-    const createdComment = await prisma.comment.create({
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        user: true,
+        comments: {
+          include: {
+            user: true,
+            likes: true,
+          },
+        },
+        likes: true,
+      },
+    });
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    return post;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to fetch post");
+  }
+};
+
+export const updatePost = async (
+  postId: number,
+  desc: string,
+  img?: string
+) => {
+  const { userId } = await auth();
+  if (!userId) throw new Error("user is not authenticated");
+
+  try {
+    // Verify the post belongs to the user
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post || post.userId !== userId) {
+      throw new Error("Unauthorized to edit this post");
+    }
+
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
       data: {
         desc,
-        userId,
-        postId: parseInt(postId), // Convert to number for Prisma
+        ...(img && { img }),
+        updatedAt: new Date(),
       },
       include: {
         user: true,
       },
     });
-    return createdComment;
+
+    revalidatePath("/");
+    return updatedPost;
   } catch (error) {
     console.log(error);
+    throw new Error("Failed to update post");
+  }
+}; // Comment like functionality - FIXED VERSION
+export const switchCommentLike = async (commentId: number) => {
+  const { userId } = await auth();
+  if (!userId) throw new Error("user is not authenticated");
+
+  try {
+    // First check if the comment exists
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      include: { likes: true },
+    });
+
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        commentId: commentId,
+        userId: userId,
+      },
+    });
+
+    if (existingLike) {
+      // Unlike the comment
+      await prisma.like.delete({
+        where: { id: existingLike.id },
+      });
+
+      // Get the updated comment with likes
+      const updatedComment = await prisma.comment.findUnique({
+        where: { id: commentId },
+        include: { likes: true },
+      });
+
+      return {
+        liked: false,
+        likeCount: updatedComment?.likes.length || 0,
+      };
+    } else {
+      // Like the comment
+      await prisma.like.create({
+        data: {
+          commentId: commentId,
+          userId: userId,
+        },
+      });
+
+      // Get the updated comment with likes
+      const updatedComment = await prisma.comment.findUnique({
+        where: { id: commentId },
+        include: { likes: true },
+      });
+
+      return {
+        liked: true,
+        likeCount: updatedComment?.likes.length || 0,
+      };
+    }
+  } catch (err) {
+    console.log(err);
     throw new Error("something went wrong !!");
   }
 };
@@ -295,14 +403,93 @@ export const deletePost = async (postId: number) => {
   if (!userId) throw new Error("user is not authenticated");
 
   try {
+    // First, check if the post exists and belongs to the user
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { userId: true },
+    });
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    if (post.userId !== userId) {
+      throw new Error("Unauthorized: You can only delete your own posts");
+    }
+
+    // Delete related records first (comments, likes) to avoid foreign key constraints
+    await prisma.comment.deleteMany({
+      where: { postId: postId },
+    });
+
+    await prisma.like.deleteMany({
+      where: { postId: postId },
+    });
+
+    // Now delete the post
     await prisma.post.delete({
+      where: { id: postId },
+    });
+
+    revalidatePath("/");
+    return { success: true, message: "Post deleted successfully" };
+  } catch (error) {
+    console.log("Delete post error:", error);
+
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+
+    throw new Error("Failed to delete post");
+  }
+};
+export const declineFollowRequest = async (senderId: string) => {
+  const { userId: currentUserId } = await auth();
+  if (!currentUserId) {
+    throw new Error("User not authenticated");
+  }
+
+  try {
+    const existingFollowRequest = await prisma.followRequest.findFirst({
       where: {
-        id: postId,
-        userId,
+        senderId,
+        receiverId: currentUserId,
       },
     });
+
+    if (existingFollowRequest) {
+      await prisma.followRequest.delete({
+        where: {
+          id: existingFollowRequest.id,
+        },
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    throw new Error("Something went wrong");
+  }
+};
+export const addComment = async (postId: string, desc: string) => {
+  const { userId } = await auth();
+  if (!userId) throw new Error("user is not authenticated");
+
+  try {
+    const createdComment = await prisma.comment.create({
+      data: {
+        desc,
+        userId,
+        postId: parseInt(postId),
+      },
+      include: {
+        user: true,
+        likes: true, // Ensure this is included
+      },
+    });
+
     revalidatePath("/");
+    return createdComment;
   } catch (error) {
     console.log(error);
+    throw new Error("something went wrong !!");
   }
 };

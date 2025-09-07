@@ -4,15 +4,13 @@ import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 
 const PostInteraction = ({
-  postId,
   likes,
   commentNumber,
 }: {
-  postId: number;
   likes: string[];
   commentNumber: number;
 }) => {
-  const { isLoaded, userId } = useAuth();
+  const { userId } = useAuth();
   const [likeState, setLikeState] = useState({
     likeCount: likes.length,
     isLiked: userId ? likes.includes(userId) : false,
@@ -31,8 +29,8 @@ const PostInteraction = ({
 
     switchOptimisticLike(undefined);
     try {
-      // Assuming you have a switchLike function imported
-      // await switchLike(postId);
+      // TODO: Implement switchLike function when ready
+      // await switchLike();
       setLikeState((state) => ({
         likeCount: state.isLiked ? state.likeCount - 1 : state.likeCount + 1,
         isLiked: !state.isLiked,
@@ -88,9 +86,7 @@ const PostInteraction = ({
             height={20}
             alt="share image"
           />
-          <span className="text-gray-500">
-            50 <span className="hidden md:inline">Shares</span>
-          </span>
+          <span className="text-gray-500">Share</span>
         </div>
       </div>
     </div>

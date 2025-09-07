@@ -1,113 +1,76 @@
+// components/feed/CommentWrapper.tsx
 "use client";
+
 import React, { useEffect, useState } from "react";
-import { addComment } from "@/lib/action";
-import { useUser } from "@clerk/nextjs";
-import { Comment, User } from "@prisma/client";
-import Image from "next/image";
+import CommentList from "./CommentList";
+import { Comment, User, Like } from "@prisma/client";
 
-type CommentWithUser = Comment & { user: User };
+export type CommentWithUser = Comment & {
+  user: User;
+  likes: Like[];
+};
 
-const CommentWrapper = ({ postId }: { postId: string }) => {
-  const { user } = useUser();
+const CommentWrapper = ({ postId }: { postId: string | number }) => {
   const [comments, setComments] = useState<CommentWithUser[]>([]);
-  const [desc, setDesc] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchComments = async () => {
-      const response = await fetch(`/api/comments?postId=${postId}`);
-      if (response.ok) {
-        const fetchedComments: CommentWithUser[] = await response.json();
-        setComments(fetchedComments);
-      } else {
-        console.error("Failed to fetch comments");
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/comments?postId=${postId}`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch comments: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Ensure all comments have a likes array
+        const commentsWithLikes = data.map((comment: CommentWithUser) => ({
+          ...comment,
+          likes: comment.likes || [],
+        }));
+
+        setComments(commentsWithLikes);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch comments:", err);
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchComments();
   }, [postId]);
 
-  const handleAddComment = async () => {
-    if (!user || !desc) return;
+  if (loading) {
+    return (
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        <div className="text-gray-500 text-center">Loading comments...</div>
+      </div>
+    );
+  }
 
-    const newComment: CommentWithUser = {
-      id: Math.floor(Math.random() * 1000000),
-      desc,
-      img: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      userId: user.id,
-      postId: parseInt(postId, 10),
-      user: {
-        id: user.id,
-        avatar: user.imageUrl || "/icons/noavatar.png",
-        username: user.username || "",
-        email: "",
-        name: user.firstName || "",
-        surname: user.lastName || "",
-      } as User,
-    };
-
-    setComments((prev) => [newComment, ...prev]); // Optimistically add the new comment
-
-    try {
-      const createdComment = await addComment(postId, desc);
-      setComments((prev) => [createdComment, ...prev]);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  if (error) {
+    return (
+      <div className="mt-4 p-4 bg-red-50 rounded-lg">
+        <div className="text-red-500 text-center">Error: {error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {user && (
-        <div>
-          <div className="flex items-center gap-4">
-            <div>
-              <Image
-                src={user.imageUrl || "/icons/noavatar.png"}
-                alt="user image"
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-full"
-              />
-            </div>
-            <input
-              type="text"
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              placeholder="Write a comment..."
-              className="bg-transparent outline-none flex-1"
-            />
-            <button
-              onClick={handleAddComment}
-              className="text-blue-500 font-medium"
-            >
-              Post
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Comments list */}
-      {comments.map((comment) => (
-        <div key={comment.id} className="mt-8">
-          <div className="flex items-center gap-4">
-            <Image
-              src={comment.user.avatar || "/icons/profile.png"}
-              width={40}
-              height={40}
-              alt="profile image"
-              className="w-10 h-10 rounded-full"
-            />
-            <span className="font-medium">
-              {comment.user.name && comment.user.surname
-                ? `${comment.user.name} ${comment.user.surname}`
-                : comment.user.username}
-            </span>
-          </div>
-          <p className="mt-6">{comment.desc}</p>
-        </div>
-      ))}
+    <div className="mt-4">
+      <CommentList initialComments={comments} postId={postId.toString()} />
     </div>
   );
 };

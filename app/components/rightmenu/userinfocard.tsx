@@ -1,18 +1,78 @@
-import Link from "next/link";
-import React from "react";
-import Image from "next/image";
-import prisma from "@/lib/client";
-import Updateuser from "./updateuser";
-import { auth } from "@clerk/nextjs/server";
-import UserInfocardInteraction from "../rightmenu/userinfocardInteraction";
+"use client";
 
-const UserInfoCard = async ({ userId }: { userId: string }) => {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import Updateuser from "../rightmenu/updateuser";
+import FriendRequests from "./FriendRequests";
+import UserinfocardInteraction from "../rightmenu/userinfocardInteraction";
+
+// Define the full user type that matches Prisma User model
+interface User {
+  id: string;
+  name: string | null;
+  surname: string | null;
+  username: string;
+  description: string | null;
+  city: string | null;
+  school: string | null;
+  work: string | null;
+  website: string | null;
+  createdAt: Date;
+  avatar: string | null;
+  email: string;
+  password: string;
+  country: string | null;
+  cover: string | null;
+  updatedAt: Date;
+}
+
+const UserInfoCard: React.FC<{ userId: string }> = ({ userId }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isUserBlocked, setIsUserBlocked] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowingSent, setIsFollowingSent] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/user/${userId}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const data = await response.json();
+        setUser(data.user);
+        setCurrentUserId(data.currentUserId);
+        setIsUserBlocked(data.isUserBlocked);
+        setIsFollowing(data.isFollowing);
+        setIsFollowingSent(data.isFollowingSent);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError("Failed to load user data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
+
+  if (loading) {
+    return <div>Loading user information...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   if (!user) {
-    return <div>User not found</div>;
+    return null;
   }
 
   const createdAtDate = new Date(user.createdAt);
@@ -21,38 +81,6 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
     month: "long",
     day: "numeric",
   });
-
-  let isUserBlocked = false;
-  let isFollowing = false;
-  let isFollowingSent = false;
-
-  const { userId: currentUserId } = await auth();
-
-  if (currentUserId) {
-    const blockedRes = await prisma.block.findFirst({
-      where: {
-        blockerId: currentUserId,
-        blockedId: user.id,
-      },
-    });
-    isUserBlocked = !!blockedRes;
-
-    const followRes = await prisma.follower.findFirst({
-      where: {
-        followerId: currentUserId,
-        followingId: user.id,
-      },
-    });
-    isFollowing = !!followRes;
-
-    const followreq = await prisma.followRequest.findFirst({
-      where: {
-        senderId: currentUserId,
-        receiverId: user.id,
-      },
-    });
-    isFollowingSent = !!followreq;
-  }
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-4 mt-4">
@@ -77,7 +105,6 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
         </div>
         {user.description && <p className="text-sm">{user.description}</p>}
       </div>
-
       <div className="mt-4 space-y-2">
         {user.city && (
           <div className="flex gap-4 items-center">
@@ -92,7 +119,6 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </span>
           </div>
         )}
-
         {user.school && (
           <div className="flex gap-4 items-center">
             <Image
@@ -106,7 +132,6 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </span>
           </div>
         )}
-
         {user.work && (
           <div className="flex gap-4 items-center">
             <Image
@@ -120,7 +145,6 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </span>
           </div>
         )}
-
         {user.website && (
           <div className="flex gap-2 items-center mt-2">
             <Image
@@ -138,25 +162,23 @@ const UserInfoCard = async ({ userId }: { userId: string }) => {
             </Link>
           </div>
         )}
-
         <div className="mt-2">
           <span className="text-sm bg-green-200 px-2 py-1 rounded">
             Joined {formattedDate}
           </span>
         </div>
       </div>
-
       {currentUserId && currentUserId !== user.id && (
         <div className="mt-4">
-          <UserInfocardInteraction
+          <UserinfocardInteraction
             userId={user.id}
-            currentUserId={currentUserId}
             isUserBlocked={isUserBlocked}
             isFollowing={isFollowing}
             isFollowingSent={isFollowingSent}
           />
         </div>
       )}
+      <FriendRequests />
     </div>
   );
 };

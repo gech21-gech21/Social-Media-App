@@ -1,12 +1,13 @@
 {
-  "name": "social-media-app",
+  "name": "social-media-app-unique-123",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.6",

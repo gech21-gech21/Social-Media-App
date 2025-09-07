@@ -1,24 +1,15 @@
-// components/Post.tsx
-"use client"; // Ensure this is a client component
-
+"use client";
 import React, { Suspense } from "react";
 import Image from "next/image";
-import { Post as PostType, User } from "@prisma/client";
 import PostInteraction from "../feed/postInteraction";
 import PostInfo from "./postinfo";
 import { useUser } from "@clerk/nextjs";
 import CommentWrapper from "../feed/CommentWrapper";
 
-type FeedType = PostType & {
-  user: User;
-  img:string;
-  likes: Array<{ userId: string }>;
-  _count: {
-    comments: number;
-  };
-};
+import  {ApiPostType} from "../../../lib/types/index"
+ 
 
-const Post = ({ post }: { post: FeedType }) => {
+const Post = ({ post }: { post: ApiPostType }) => {
   const { user: currentUser } = useUser();
   const userId = currentUser?.id;
 
@@ -62,7 +53,6 @@ const Post = ({ post }: { post: FeedType }) => {
         {/* Interaction */}
         <Suspense fallback="Loading...">
           <PostInteraction
-            postId={post.id}
             likes={post.likes.map((like) => like.userId)}
             commentNumber={post._count.comments}
           />
